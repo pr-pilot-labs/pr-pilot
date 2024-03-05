@@ -4,11 +4,10 @@ import re
 from django.http import JsonResponse
 from github import Github
 
+from engine.models import Task
 from webhooks.jwt_tools import get_installation_access_token
 
 logger = logging.getLogger(__name__)
-
-
 
 
 def handle_issue_comment(payload: dict):
@@ -34,6 +33,20 @@ def handle_issue_comment(payload: dict):
         issue = repo.get_issue(number=issue_number)
         # Create a comment mentioning the user with the command
         issue.create_comment(f'@{commenter_username} Hang tight, I\'ll take a look')
+        user_request = f"""
+The Github user `{commenter_username}` requested the following command:
+
+```
+{command}
+```
+
+Issue number: {issue_number}
+
+Read the issue, fulfill the user's request and post the result as a comment.
+"""
+        Task.schedule(title="Respond to comment", user_request=user_request,
+                      installation_id=installation_id, github_project=repository,
+                      github_user=commenter_username, branch="main")
 
     else:
         command = None

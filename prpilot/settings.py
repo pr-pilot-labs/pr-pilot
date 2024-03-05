@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-lhats43v$iksb*slj3q#@&l(nnp6+cf*1!atj^_elt8^innjrr'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'false').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
 
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
     'accounts',
-    'webhooks'
+    'webhooks',
+    'engine'
 ]
 
 MIDDLEWARE = [
@@ -138,6 +139,8 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+
 GITHUB_CLIENT_ID = os.getenv('GITHUB_APP_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.getenv('GITHUB_APP_SECRET')
 GITHUB_WEBHOOK_SECRET = os.getenv('GITHUB_WEBHOOK_SECRET')
@@ -188,3 +191,9 @@ LOGGING = {
 }
 
 PRIVATE_KEY_PATH = os.getenv('GITHUB_APP_PRIVATE_KEY_PATH', os.path.join(BASE_DIR, 'github_app_private_key.pem'))
+TASK_ID = os.getenv('TASK_ID')
+REPO_DIR = os.getenv('REPO_DIR', '/repo')
+MAX_FILE_LINES = 600
+MAX_FILE_SEARCH_RESULTS = 50
+MAX_READ_FILES = 5
+IGNORE_FILE_PATH = Path(os.getcwd()) / ".pilotignore"
