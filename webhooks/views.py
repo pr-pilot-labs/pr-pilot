@@ -12,6 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from webhooks.handlers.app_deletion import handle_app_deletion
 from webhooks.handlers.app_installation import handle_app_installation
 from webhooks.handlers.handle_issue_comment import handle_issue_comment
+from webhooks.handlers.pull_request_review_comment import handle_pull_request_review_comment
 from webhooks.models import GitHubAppInstallation, GitHubAccount
 
 
@@ -39,6 +40,10 @@ def github_webhook(request):
     if request.method == 'POST':
         payload = json.loads(request.body.decode('utf-8'))
         event = request.headers.get('X-GitHub-Event', 'ping')  # Get the event type
+
+        if event == 'pull_request_review_comment' and payload['action'] == 'created':
+            # Handle new pull request review comment here
+            return handle_pull_request_review_comment(payload)
 
         if event == 'issue_comment' and payload['action'] == 'created':
             # Handle new issue comment here

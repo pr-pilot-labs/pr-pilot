@@ -24,7 +24,11 @@ class Task(models.Model):
     github_user = models.CharField(max_length=200)
     branch = models.CharField(max_length=200)
     issue_number = models.IntegerField(blank=True, null=True)
+    pr_number = models.IntegerField(blank=True, null=True)
     user_request = models.TextField(blank=True)
+    head = models.CharField(max_length=200, blank=True, null=True)
+    base = models.CharField(max_length=200, blank=True, null=True)
+    comment_id = models.IntegerField()
     result = models.TextField(blank=True)
 
     def __str__(self):
@@ -42,9 +46,8 @@ class Task(models.Model):
         return Github(get_installation_access_token(self.installation_id))
 
     @staticmethod
-    def schedule(title, user_request, installation_id, github_project, github_user, branch, issue_number=None):
-        new_task = Task(title=title, status="scheduled", installation_id=installation_id, github_project=github_project,
-                        github_user=github_user, branch=branch, user_request=user_request, issue_number=issue_number)
+    def schedule(**kwargs):
+        new_task = Task(**kwargs, status="scheduled")
         new_task.save()
         if settings.DEBUG:
             settings.TASK_ID = new_task.id

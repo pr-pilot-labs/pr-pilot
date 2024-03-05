@@ -4,6 +4,7 @@ import shutil
 
 import git
 from django.conf import settings
+from github import Github
 from langchain_openai import ChatOpenAI
 
 from engine.agents.pr_pilot_agent import create_pr_pilot_agent
@@ -40,18 +41,18 @@ class TaskEngine(Engine):
 
         if self.create_branch:
             working_branch = self.setup_working_branch(self.task.title)
-
+        g = Github(github_token)
+        repo = g.get_repo(self.task.github_project)
         try:
             executor_result = self.executor.invoke({"user_request": self.task.user_request})
-            self.task.result = executor_result
+            self.task.result = executor_result['output']
             self.task.status = "completed"
-            event_log_message = executor_result
+            final_response = executor_result['output']
         except Exception as e:
             self.task.status = "failed"
             self.task.result = str(e)
             logger.error("Failed to run task", exc_info=e)
-            event_log_message = f"Task run failed: {str(e)}"
-            executor_result = event_log_message
+            final_response = f"Task run failed: {str(e)}"
         finally:
             self.task.save()
             if self.create_branch:
@@ -60,9 +61,15 @@ class TaskEngine(Engine):
 
                     pr_info = generate_pr_info(executor_result)
                     if not pr_info:
-                        pr_info = LabelsAndTitle(title=self.tool.title, labels=["darwin"])
+                        pr_info = LabelsAndTitle(title=self.task.title, labels=["darwin"])
                     pr = Project.from_github().create_pull_request(title=pr_info.title, body=executor_result, head=working_branch, labels=pr_info.labels)
-                    event_log_message += f"\n\nPull request has been created: [#{pr.number}]({pr.html_url})"
-        TaskEvent.add(actor="assistant", action="run_task", target=self.task.title, message=event_log_message, transaction="end")
-        return event_log_message
+                    final_response += f"\n\nPull request has been created: [#{pr.number}]({pr.html_url})"
+        if self.task.pr_number:
+            pr = repo.get_pull(self.task.pr_number)
+            pr.create_review_comment_reply(self.task.comment_id, final_response)
+        elif self.task.issue_number:
+            issue = repo.get_issue(self.task.issue_number)
+            issue.create_comment(final_response)
+        TaskEvent.add(actor="assistant", action="run_task", target=self.task.title, message=final_response, transaction="end")
+        return final_response
 

@@ -10,11 +10,13 @@ from webhooks.jwt_tools import get_installation_access_token
 logger = logging.getLogger(__name__)
 
 
-def handle_issue_comment(payload: dict):
+def handle_pull_request_review_comment(payload):
     # Extract commenter's username
     commenter_username = payload['comment']['user']['login']
-    issue_number = payload['issue']['number']
     comment_id = payload['comment']['id']
+    pr_number = payload['pull_request']['number']
+    head = payload['pull_request']['head']['ref']
+    base = payload['pull_request']['base']['ref']
     repository = payload['repository']['full_name']
     installation_id = payload['installation']['id']
 
@@ -30,26 +32,24 @@ def handle_issue_comment(payload: dict):
         logger.info(f'Found command: {command} by {commenter_username}')
         g = Github(get_installation_access_token(installation_id))
         repo = g.get_repo(repository)
-        issue = repo.get_issue(number=issue_number)
-        comment = issue.get_comment(comment_id)
+        comment = repo.get_pull(pr_number).get_comment(comment_id)
         comment.create_reaction("eyes")
         user_request = f"""
-The Github user `{commenter_username}` mentioned you in a comment:
+    The Github user `{commenter_username}` mentioned you in a pull request:
+    PR number: {pr_number}
+    User Comment:
+    ```
+    {command}
+    ```
 
-Issue number: {issue_number}
-User comment:
-```
-{command}
-```
-
-Read the issue, fulfill the user's request and return the response to the user's comment.
-"""
-        Task.schedule(title="Respond to comment", user_request=user_request,
-                      issue_number=issue_number, comment_id=comment_id,
+    Read the pull request, fulfill the user's request and return the response to the user's comment.
+    """
+        Task.schedule(title=command, user_request=user_request, comment_id=comment_id,
+                      pr_number=pr_number, head=head, base=base,
                       installation_id=installation_id, github_project=repository,
                       github_user=commenter_username, branch="main")
 
     else:
         command = None
 
-    return JsonResponse({'status': 'ok', 'message': 'Issue comment processed'})
+    return JsonResponse({'status': 'ok', 'message': 'PR comment processed'})
