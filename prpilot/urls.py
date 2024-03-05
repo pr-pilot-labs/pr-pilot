@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),  # Add this line
     path('user/', include('accounts.urls')),  # Include accounts URLs
+    path('webhooks/', include('webhooks.urls')),  # Include accounts URLs
 ]

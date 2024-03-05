@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.github',
-    'accounts'
+    'accounts',
+    'webhooks'
 ]
 
 MIDDLEWARE = [
@@ -140,6 +141,7 @@ AUTHENTICATION_BACKENDS = (
 GITHUB_CLIENT_ID = os.getenv('GITHUB_APP_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.getenv('GITHUB_APP_SECRET')
 GITHUB_WEBHOOK_SECRET = os.getenv('GITHUB_WEBHOOK_SECRET')
+GITHUB_APP_ID = os.getenv('GITHUB_APP_ID')
 
 # Add at the end of the file
 LOGIN_REDIRECT_URL = '/'  # Redirect to home after login
@@ -164,21 +166,25 @@ AUTH_USER_MODEL = 'accounts.PilotUser'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
-        'django': {
+        '': {  # root logger
             'handlers': ['console'],
             'level': 'INFO',
-        },
-        'allauth': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
             'propagate': True,
         },
     },
 }
 
+PRIVATE_KEY_PATH = os.getenv('GITHUB_APP_PRIVATE_KEY_PATH', os.path.join(BASE_DIR, 'github_app_private_key.pem'))
