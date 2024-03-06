@@ -95,8 +95,10 @@ class TaskEngine:
             self.project.checkout_branch(self.task.head)
         else:
             working_branch = self.setup_working_branch(self.task.title)
-
         try:
+            # Make sure we never work directly on the main branch
+            if self.project.active_branch == self.project.main_branch:
+                raise ValueError(f"Cannot work on the main branch {self.project.main_branch}.")
             executor_result = self.executor.invoke({"user_request": self.task.user_request})
             self.task.result = executor_result['output']
             self.task.status = "completed"
