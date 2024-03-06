@@ -37,6 +37,7 @@ class Project(BaseModel):
         return Project(name=repo.full_name, main_branch=repo.default_branch)
 
     def discard_all_changes(self):
+        logger.info("Discarding all changes")
         repo = git.Repo(settings.REPO_DIR)
         repo.git.reset(hard=True)
 
@@ -46,24 +47,33 @@ class Project(BaseModel):
         origin.fetch()
 
     def checkout_latest_default_branch(self):
+        logger.info(f"Checking out latest {self.main_branch} branch")
         repo = git.Repo(settings.REPO_DIR)
         repo.git.checkout(self.main_branch)
         repo.git.pull()
+
+    def checkout_branch(self, branch):
+        logger.info(f"Checking out branch {branch}")
+        repo = git.Repo(settings.REPO_DIR)
+        repo.git.checkout(branch)
 
     def has_uncommitted_changes(self):
         repo = git.Repo(settings.REPO_DIR)
         return repo.is_dirty(untracked_files=True)
 
     def create_new_branch(self, branch_name):
+        logger.info(f"Creating new branch {branch_name}")
         repo = git.Repo(settings.REPO_DIR)
         repo.git.checkout('-b', branch_name)
 
     def push_branch(self, branch):
+        logger.info(f"Pushing branch {branch} to origin")
         repo = git.Repo(settings.REPO_DIR)
         origin = repo.remote(name='origin')
         origin.push(refspec='{}:refs/heads/{}'.format(branch, branch))
 
     def delete_branch(self, branch):
+        logger.info(f"Deleting branch {branch}")
         repo = git.Repo(settings.REPO_DIR)
         repo.git.branch('-d', branch)
 

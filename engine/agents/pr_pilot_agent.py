@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.analysis_agent import talk_to_analysis_agent_agent
 from engine.agents.common import AGENT_COMMUNICATION_RULES
-from engine.agents.github_agent import talk_to_github_agent
+from engine.agents.github_agent import talk_to_github_agent, read_github_issue, read_pull_request
 from engine.agents.web_search_agent import talk_to_web_search_agent
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
@@ -28,7 +28,6 @@ system_message = """
 You are PR Pilot, an AI agent that works on Github issues and PRs.
 
 You do your work by talking to the following agents:
-- GithubAgent: Can interact with Github issues and pull requests
 - WebSearchAgent: Finds information on the web
 - AnalysisAgent: Analyzes the code base for potential issues and insights
 
@@ -75,16 +74,20 @@ def create_directory(path: str):
     return f"Directory {path} created."
 
 @tool
-def write_file(path: str, complete_entire_file_content: str):
-    """Write content to a file. IMPORTANT: Do not truncate the file, always write the entire content."""
+def write_file(path: str, complete_entire_file_content: str, commit_message: str):
+    """Write content to a file.
+    :param path: Path to the file
+    :param complete_entire_file_content: Complete content of the file. NEVER use placeholders or partial content.
+    :param commit_message: Short commit message for the change
+    """
     path = path.lstrip("/")
     file_system = FileSystem()
     # if file_system.get_node(Path(path)):
     #     return f"File already exists: `{path}`. Not creating a new file."
     TaskEvent.add(actor="assistant", action="write_file", target=path)
     file_system.save(complete_entire_file_content, Path(path))
-    Project.commit_all_changes(f"Add new file {path}")
-    return f"Successfully created `{path}`"
+    Project.commit_all_changes(commit_message)
+    return f"Successfully wrote content to `{path}`"
 
 @tool
 def read_files(file_paths: list[str]):
@@ -111,7 +114,7 @@ def read_files(file_paths: list[str]):
 
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [talk_to_github_agent, talk_to_web_search_agent, talk_to_analysis_agent_agent, create_directory, write_file, read_files, search_files] + file_tools
+    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, talk_to_analysis_agent_agent, create_directory, write_file, read_files, search_files] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),

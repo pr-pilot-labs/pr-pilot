@@ -129,7 +129,7 @@ def read_github_issue(issue_number: int):
 
 def create_github_agent():
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0, callbacks=[CostTrackerCallback("gpt-3.5-turbo", "Github Interaction")])
-    tools = [list_open_github_issues, list_open_pull_requests, read_pull_request, read_github_issue, comment_on_github_issue, create_github_issue]
+    tools = [list_open_github_issues, list_open_pull_requests, read_pull_request, read_github_issue, create_github_issue]
 
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),

@@ -33,21 +33,30 @@ def handle_issue_comment(payload: dict):
         issue = repo.get_issue(number=issue_number)
         comment = issue.get_comment(comment_id)
         comment.create_reaction("eyes")
+        issue_or_pr = "PR" if issue.pull_request else "Issue"
         user_request = f"""
 The Github user `{commenter_username}` mentioned you in a comment:
 
-Issue number: {issue_number}
+{issue_or_pr} number: {issue_number}
 User comment:
 ```
 {command}
 ```
 
-Read the issue, fulfill the user's request and return the response to the user's comment.
+Read the {issue_or_pr}, fulfill the user's request and return your response to the user's comment.
 """
-        Task.schedule(title="Respond to comment", user_request=user_request,
-                      issue_number=issue_number, comment_id=comment_id,
-                      installation_id=installation_id, github_project=repository,
-                      github_user=commenter_username, branch="main")
+        task_args = dict(title=f"Respond to {issue_or_pr} #{issue_number}", user_request=user_request,
+                         issue_number=issue_number, comment_id=comment_id,
+                         installation_id=installation_id, github_project=repository,
+                         github_user=commenter_username, branch="main")
+        if issue.pull_request:
+            pr = repo.get_pull(issue_number)
+            task_args['pr_number'] = issue_number
+            task_args['head'] = pr.head.ref
+            task_args['base'] = pr.base.ref
+        else:
+            task_args['issue_number'] = issue_number
+        Task.schedule(**task_args)
 
     else:
         command = None
