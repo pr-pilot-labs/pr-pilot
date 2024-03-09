@@ -17,9 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from accounts.views import health_check
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),  # Add this line
     path('user/', include('accounts.urls')),  # Include accounts URLs
     path('webhooks/', include('webhooks.urls')),  # Include accounts URLs
+    path('healthz/', health_check, name='health_check'),
 ]
