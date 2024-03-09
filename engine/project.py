@@ -70,7 +70,7 @@ class Project(BaseModel):
         logger.info(f"Pushing branch {branch} to origin")
         repo = git.Repo(settings.REPO_DIR)
         origin = repo.remote(name='origin')
-        origin.push(refspec='{}:refs/heads/{}'.format(branch, branch))
+        origin.push(refspec='{}:refs/heads/{}'.format(branch, branch), set_upstream=True)
 
     def delete_branch(self, branch):
         logger.info(f"Deleting branch {branch}")

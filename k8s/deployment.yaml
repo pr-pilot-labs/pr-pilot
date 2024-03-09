@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pr-pilot-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pr-pilot
+  template:
+    metadata:
+      labels:
+        app: pr-pilot
+    spec:
+      volumes:
+        - name: pem-volume
+          secret:
+            secretName: pr-pilot-private-key
+      serviceAccountName: pr-pilot-sa
+      initContainers:
+        - name: django-migrate
+          image: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app:latest
+          command: [ "python", "manage.py", "migrate" ]
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pr-pilot-db-postgresql
+                  key: postgres-password
+      containers:
+      - name: pr-pilot
+        image: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app:latest
+        imagePullPolicy: Always
+        volumeMounts:
+          - name: pem-volume
+            mountPath: /etc/ssl/certs/github_private_key.pem
+            subPath: github_app_private_key.pem
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "1"
+          requests:
+            memory: "200Mi"
+            cpu: "0.2"
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GITHUB_APP_PRIVATE_KEY_PATH
+          value: "/etc/ssl/certs/github_private_key.pem"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pr-pilot-db-postgresql
+              key: postgres-password
+        envFrom:
+        - secretRef:
+            name: pr-pilot-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pr-pilot-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: pr-pilot
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8000

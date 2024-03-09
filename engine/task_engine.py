@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.pr_pilot_agent import create_pr_pilot_agent
 from engine.langchain.generate_pr_info import generate_pr_info, LabelsAndTitle
+from engine.langchain.generate_task_title import generate_task_title
 from engine.models import Task, TaskEvent
 from engine.project import Project
 from engine.util import slugify
@@ -86,9 +87,19 @@ class TaskEngine:
             TaskEvent.add(actor="assistant", action="delete_branch", target=branch_name, message="No changes were made")
             return False
 
+    def generate_task_title(self):
+        if self.task.pr_number:
+            pr = self.github_repo.get_pull(self.task.pr_number)
+            self.task.title = generate_task_title(pr.body, self.task.user_request)
+        else:
+            issue = self.github_repo.get_issue(self.task.issue_number)
+            self.task.title = generate_task_title(issue.body, self.task.user_request)
+        self.task.save()
+
 
     def run(self) -> str:
         self.clone_github_repo()
+        self.generate_task_title()
         working_branch = None
         # If task is a PR, checkout the PR branch
         if self.task.pr_number:
@@ -103,21 +114,22 @@ class TaskEngine:
             self.task.result = executor_result['output']
             self.task.status = "completed"
             final_response = executor_result['output']
-        except Exception as e:
-            self.task.status = "failed"
-            self.task.result = str(e)
-            logger.error("Failed to run task", exc_info=e)
-            final_response = f"Task run failed: {str(e)}"
-        finally:
-            self.task.save()
             if working_branch and self.finalize_working_branch(working_branch):
                 # We have changes, create a PR
                 logger.info(f"Creating pull request for branch {working_branch}")
                 pr_info = generate_pr_info(final_response)
                 if not pr_info:
                     pr_info = LabelsAndTitle(title=self.task.title, labels=["darwin"])
-                pr = Project.from_github().create_pull_request(title=pr_info.title, body=final_response, head=working_branch, labels=pr_info.labels)
+                pr = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
+                                                               head=working_branch, labels=pr_info.labels)
                 final_response += f"\n\nPull request has been created: [#{pr.number}]({pr.html_url})"
+        except Exception as e:
+            self.task.status = "failed"
+            self.task.result = str(e)
+            logger.error("Failed to run task", exc_info=e)
+            final_response = f"I'm sorry, something went wrong, please check [Your Dashboard](https:/app.pr-pilot.ai) for details."
+        finally:
+            self.task.save()
         if self.task.pr_number:
             # Respond to the user's comment on the PR
             self.project.push_branch(self.task.head)

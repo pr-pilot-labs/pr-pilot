@@ -83,12 +83,24 @@ WSGI_APPLICATION = 'prpilot.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',  # Default is 'postgres'
+            'USER': 'postgres',
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),  # Use the password obtained above
+            'HOST': 'pr-pilot-db-postgresql.default.svc.cluster.local',  # Use your PostgreSQL service name
+            'PORT': '5432',
+        }
+    }
 
 
 # Password validation

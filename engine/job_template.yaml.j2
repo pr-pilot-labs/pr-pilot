@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ job_name }}
+  labels: {{ labels | tojson }}
+spec:
+  ttlSecondsAfterFinished: 7200  # 2 hours = 7200 seconds
+  backoffLimit: 4
+  template:
+    spec:
+      volumes:
+      - name: pem-volume
+        secret:
+          secretName: pr-pilot-private-key
+      containers:
+      - name: task
+        image: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-worker:latest
+        volumeMounts:
+          - name: pem-volume
+            mountPath: /etc/ssl/certs/github_private_key.pem
+            subPath: github_app_private_key.pem
+        resources:
+          limits:
+            memory: "500Mi"
+            cpu: "1"
+          requests:
+            memory: "200Mi"
+            cpu: "0.2"
+        env:
+        - name: GITHUB_APP_PRIVATE_KEY_PATH
+          value: "/etc/ssl/certs/github_private_key.pem"
+        - name: TASK_ID
+          value: "{{ task_id }}"
+        envFrom:
+        - secretRef:
+          name: pr-pilot-secret
+        restartPolicy: Never
+

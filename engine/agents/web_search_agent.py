@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.document_transformers import Html2TextTransformer
@@ -40,9 +41,14 @@ def scrape_website(url: str):
 system_message = """
 You are WebSearchAgent. You handle requests to search the web or scrape a specific website.
 
+When asked to search the web, you must:
+- Formulate a search query that will help you respond to the user's request
+
 When asked to scrape a website, you must
 - Return the full text of the website, do not summarize
 - Markdown-format the text
+
+Only scrape a website if you are given a specific URL to scrape.
 """
 
 
