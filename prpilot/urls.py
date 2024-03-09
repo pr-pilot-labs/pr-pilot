@@ -15,14 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse_lazy
+from django.views.generic import RedirectView
 
-from accounts.views import health_check
+from accounts.views import health_check, home
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),  # Add this line
     path('user/', include('accounts.urls')),  # Include accounts URLs
     path('webhooks/', include('webhooks.urls')),  # Include accounts URLs
+    path('dashboard/', include('dashboard.urls')),  # Include accounts URLs
     path('healthz/', health_check, name='health_check'),
 ]

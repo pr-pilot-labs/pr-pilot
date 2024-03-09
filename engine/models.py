@@ -61,7 +61,7 @@ class Task(models.Model):
 
 class TaskEvent(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="events")
     timestamp = models.DateTimeField(auto_now_add=True)
     actor = models.CharField(max_length=200)
     action = models.CharField(max_length=200)
