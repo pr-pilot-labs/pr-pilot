@@ -19,7 +19,7 @@ spec:
       serviceAccountName: pr-pilot-sa
       initContainers:
         - name: django-migrate
-          image: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app:latest
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           command: [ "python", "manage.py", "migrate" ]
           env:
             - name: POSTGRES_PASSWORD
@@ -29,7 +29,7 @@ spec:
                   key: postgres-password
       containers:
       - name: pr-pilot
-        image: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app:latest
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         imagePullPolicy: Always
         volumeMounts:
           - name: pem-volume

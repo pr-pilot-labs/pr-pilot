@@ -16,12 +16,14 @@ RUN apt-get update && apt-get install -y \
 # Set work directory
 WORKDIR /usr/src/app
 
+
+# Install uwsgi
+RUN pip install uwsgi
+
 # Install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install uwsgi
-RUN pip install uwsgi
 
 # Copy project
 COPY . .

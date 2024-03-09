@@ -10,3 +10,4 @@ local.env
 .pytest_cache
 *.sqlite3
 *.pem
+*.tgz

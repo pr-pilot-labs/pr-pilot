@@ -15,8 +15,9 @@ docker-push: build-docker
 	docker tag $(WORKER_IMAGE_NAME):$(VERSION) $(REGISTRY_URL)/$(WORKER_IMAGE_NAME):latest
 	docker push $(REGISTRY_URL)/$(WORKER_IMAGE_NAME):$(VERSION)
 	docker push $(REGISTRY_URL)/$(WORKER_IMAGE_NAME):latest
-deploy:docker-push
-	kubectl set image deployment/pr-piolot-app pr-pilot=$(REGISTRY_URL)/$(APP_IMAGE_NAME):$(VERSION)
+deploy:
+	helm package pr-pilot --version $(VERSION) --app-version $(VERSION)
+	helm upgrade pr-pilot ./pr-pilot-$(VERSION).tgz --set image.tag=$(VERSION)
 create-k8s-secrets:
 	kubectl create secret generic pr-pilot-private-key --from-file=github_app_private_key.pem
 	kubectl create secret generic pr-pilot-secret --from-env-file=local.env
