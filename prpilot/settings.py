@@ -58,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'prpilot.middleware.LoginRequiredMiddleware'
 ]
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
@@ -162,7 +161,7 @@ GITHUB_WEBHOOK_SECRET = os.getenv('GITHUB_WEBHOOK_SECRET')
 GITHUB_APP_ID = os.getenv('GITHUB_APP_ID')
 
 # Add at the end of the file
-LOGIN_REDIRECT_URL = '/'  # Redirect to home after login
+LOGIN_REDIRECT_URL = '/dashboard/tasks/'  # Redirect to home after login
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_PROVIDERS = {
     'github': {
@@ -205,6 +204,7 @@ LOGGING = {
     },
 }
 
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
 PRIVATE_KEY_PATH = os.getenv('GITHUB_APP_PRIVATE_KEY_PATH', os.path.join(BASE_DIR, 'github_app_private_key.pem'))
 TASK_ID = os.getenv('TASK_ID')
 REPO_DIR = os.getenv('REPO_DIR', '/repo')

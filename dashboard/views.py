@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -8,7 +9,7 @@ from engine.models import Task
 
 
 # Create your views here.
-class TaskListView(SingleTableView):
+class TaskListView(SingleTableView, LoginRequiredMixin):
     model = Task
     table_class = TaskTable
     template_name = 'task_list.html'
@@ -17,7 +18,7 @@ class TaskListView(SingleTableView):
         # Filter the tasks by the logged-in user's ID
         return Task.objects.filter(github_user=self.request.user.username)
 
-class TaskDetailView(DetailView):
+class TaskDetailView(DetailView, LoginRequiredMixin):
     model = Task
     template_name = 'task_detail.html'
     context_object_name = 'task'

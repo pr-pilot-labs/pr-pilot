@@ -19,5 +19,5 @@ deploy:
 	helm upgrade --install pr-pilot ./helm-chart --set image.tag=$(VERSION)
 create-k8s-secrets:
 	kubectl create secret generic pr-pilot-private-key --from-file=github_app_private_key.pem
-	kubectl create secret generic pr-pilot-secret --from-env-file=local.env
+	kubectl create secret generic pr-pilot-secret --from-env-file=k8s.env
 
