@@ -55,6 +55,7 @@ class EventTable(tables.Table):
     class Meta:
         model = TaskEvent  # Use the model associated with the events
         template_name = "django_tables2/bootstrap5.html"
+        attrs = {"class": "table table-striped table-hover"}
         fields = ['timestamp', 'action', 'target', 'message']
 
 class CostItemTable(tables.Table):

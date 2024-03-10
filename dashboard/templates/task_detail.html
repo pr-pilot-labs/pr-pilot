@@ -2,8 +2,24 @@
 {% load render_table from django_tables2 %}
 {% block content %}
     <h1>{{task.title }}</h1>
-    <p class="lead">{{ task_result }}</p>
-    <h3>Event Log</h3>
+    <p>
+        {% if task.status == 'running' %}
+            <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
+        {% endif %}
+        {% if task.status == 'failed' %}
+        <span class="badge bg-danger">{{ task.status }}</span>
+        {% elif task.status == 'completed' %}
+        <span class="badge bg-success">{{ task.status }}</span>
+        {% elif task.status == 'scheduled' %}
+        <span class="badge bg-info">{{ task.status }}</span>
+        {% else %}
+        <span class="badge bg-warning">{{ task.status }}</span>
+        {% endif %}
+        <span class="text-muted">{{ task.created }}</span>
+    </p>
+    <div class="lead p-3">
+        {{ task_result }}
+    </div>
     {% render_table event_table %}
 
     <h3>Cost: ${{ total_cost|floatformat:3 }} </h3>
