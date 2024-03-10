@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: pr-pilot-app
 spec:
-  replicas: 3
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
       app: pr-pilot

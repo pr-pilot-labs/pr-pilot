@@ -7,3 +7,4 @@ venv
 *.pem
 repo_workspace
 *.tgz
+static

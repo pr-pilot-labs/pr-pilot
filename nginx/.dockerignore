@@ -11,4 +11,3 @@ local.env
 *.sqlite3
 *.pem
 *.tgz
-nginx

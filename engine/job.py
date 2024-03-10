@@ -3,13 +3,12 @@ from jinja2 import FileSystemLoader, Environment, select_autoescape
 from kubernetes import config
 from kubernetes.client import BatchV1Api
 
-from engine.models import Task
 from engine.util import slugify
 
 
 class KubernetesJob:
 
-    def __init__(self, task: Task):
+    def __init__(self, task):
         self.task = task
 
     def spawn(self):

@@ -8,6 +8,7 @@ from django.core.management import call_command
 from django.db import models
 from github import Github
 
+from engine.job import KubernetesJob
 from engine.util import run_task_in_background
 from webhooks.jwt_tools import get_installation_access_token
 
@@ -55,7 +56,8 @@ class Task(models.Model):
             thread = threading.Thread(target=run_task_in_background, args=(new_task.id,))
             thread.start()
         else:
-            raise ValueError("Running tasks in production is not supported")
+            job = KubernetesJob(new_task)
+            job.spawn()
         return new_task
 
 
