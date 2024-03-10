@@ -1,17 +1,20 @@
 import logging
 import os
 import shutil
+from decimal import Decimal
 
 import git
 from django.conf import settings
+from django.db.models import Sum
 from git import Repo
 from github import Github, GithubException
 from langchain_openai import ChatOpenAI
 
+from accounts.models import UserBudget
 from engine.agents.pr_pilot_agent import create_pr_pilot_agent
 from engine.langchain.generate_pr_info import generate_pr_info, LabelsAndTitle
 from engine.langchain.generate_task_title import generate_task_title
-from engine.models import Task, TaskEvent
+from engine.models import Task, TaskEvent, CostItem
 from engine.project import Project
 from engine.util import slugify
 from webhooks.jwt_tools import get_installation_access_token
@@ -127,6 +130,15 @@ class TaskEngine:
             final_response = f"I'm sorry, something went wrong, please check [Your Dashboard](https:/app.pr-pilot.ai) for details."
         finally:
             self.task.save()
+            total_cost = CostItem.objects.filter(task=self.task).aggregate(Sum('total_cost_usd'))['total_cost_usd__sum']
+            if total_cost:
+                logger.info(f"Total cost of task: ${total_cost}")
+                budget = UserBudget.get_user_budget(self.task.github_user)
+                budget.budget = budget.budget - Decimal(str(total_cost))
+                logger.info(f"Remaining budget for user {self.task.github_user}: ${budget.budget}")
+                budget.save()
+            else:
+                logger.warning(f"No cost items found for task {self.task.title}")
         if self.task.pr_number:
             # Respond to the user's comment on the PR
             self.project.push_branch(self.task.head)

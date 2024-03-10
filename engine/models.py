@@ -1,4 +1,5 @@
 import logging
+import os
 import threading
 import uuid
 from functools import lru_cache
@@ -52,6 +53,7 @@ class Task(models.Model):
         new_task.save()
         if settings.DEBUG:
             settings.TASK_ID = new_task.id
+            os.environ["TASK_ID"] = str(new_task.id)
             logger.info(f"Running task in debug mode: {new_task.id}")
             thread = threading.Thread(target=run_task_in_background, args=(new_task.id,))
             thread.start()
