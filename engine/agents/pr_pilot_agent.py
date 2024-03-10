@@ -1,7 +1,9 @@
 import logging
 from pathlib import Path
+from typing import Optional
 
 from django.conf import settings
+from github.GithubObject import Opt, NotSet
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain_core.messages import SystemMessage
@@ -12,11 +14,11 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.analysis_agent import talk_to_analysis_agent_agent
 from engine.agents.common import AGENT_COMMUNICATION_RULES
-from engine.agents.github_agent import talk_to_github_agent, read_github_issue, read_pull_request
+from engine.agents.github_agent import read_github_issue, read_pull_request
 from engine.agents.web_search_agent import talk_to_web_search_agent
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
-from engine.models import TaskEvent
+from engine.models import TaskEvent, Task
 from engine.project import Project
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,8 @@ To interact with the file system, use your own functions.
 - Reading files is EXPENSIVE. Only read the files you really need to solve the task
 - When writing files, ALWAYS write the entire file content, do not leave anything out.
 
+# Searching the code base
+You can search the code base using the `search_github_code` function. It uses the Github search syntax.
 
 """ + AGENT_COMMUNICATION_RULES
 
@@ -112,9 +116,54 @@ def read_files(file_paths: list[str]):
         return f"The content of {file_paths} is longer than {settings.MAX_FILE_LINES} lines and too expensive to analyze. Abort!"
     return output
 
+
+@tool
+def search_github_code(query: str, sort: Optional[str], order: Optional[str], highlight: bool = True):
+    """Search for code in the repository.
+        :param query: Search query in Github search syntax
+        :param sort: string ('indexed')
+        :param order: string ('asc', 'desc')
+        :param highlight: boolean (True, False)
+        :param qualifiers: keyword dict query qualifiers
+    """
+    g = Task.current().github
+    # Force query to use the repository name
+    query = f"{query} repo:{Task.current().github_project}"
+    results = g.search_code(query, sort=sort, order=order, highlight=highlight)
+    if not results.totalCount:
+        return "No code found"
+    response = ""
+    for result in results:
+        for match in result.text_matches:
+            response += f"**Match in `{result.path}`**\n"
+            response += f"```\n{match['fragment']}\n```\n\n"
+    return response
+
+
+@tool
+def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
+    """Search for issues in the repository.
+    :param query: Search query in Github search syntax
+    :param sort: string ('created', 'updated', 'comments')
+    :param order: string ('asc', 'desc')
+    """
+    g = Task.current().github
+    # Force query to use the repository name
+    query = f"{query} repo:{Task.current().github_project}"
+    results = g.search_issues(query, sort=sort, order=order)
+    if not results.totalCount:
+        return "No issues found"
+    response = ""
+    for result in results:
+        response += f"**Issue #{result.number}**\n"
+        response += f"{result.title}\n"
+        response += f"{result.html_url}\n\n"
+    return response
+
+
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, talk_to_analysis_agent_agent, create_directory, write_file, read_files, search_files] + file_tools
+    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_github_code, search_github_issues] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),

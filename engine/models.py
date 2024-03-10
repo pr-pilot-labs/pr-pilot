@@ -44,7 +44,7 @@ class Task(models.Model):
         return Task.objects.get(id=settings.TASK_ID)
 
     @property
-    def github(self):
+    def github(self) -> Github:
         return Github(get_installation_access_token(self.installation_id))
 
     @staticmethod
