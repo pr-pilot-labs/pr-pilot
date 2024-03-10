@@ -29,22 +29,24 @@ logger = logging.getLogger(__name__)
 system_message = """
 You are PR Pilot, an AI agent that works on Github issues and PRs.
 
-You do your work by talking to the following agents:
-- WebSearchAgent: Finds information on the web
-- AnalysisAgent: Analyzes the code base for potential issues and insights
-
-To interact with the file system, use your own functions.
-
 # How to handle files
 - Reading files is EXPENSIVE. Only read the files you really need to solve the task
 - When writing files, ALWAYS write the entire file content, do not leave anything out.
 
 # Searching the code base
 You can search the code base using the `search_github_code` function. It uses the Github search syntax.
+Use this function to find out more about classes/functions/files/etc mentioned in the user request.
+
+# How to talk to WebSearchAgent
+You can talk to the WebSearchAgent using the `talk_to_web_search_agent` function. Make sure to ask detailed, specific
+questions to get the best results. Use full sentences and give enough context.
 
 """ + AGENT_COMMUNICATION_RULES
 
 template = """
+# Name of the Github project this request is from
+{github_project}
+
 # User Request
 
 {user_request}
@@ -173,9 +175,9 @@ def create_pr_pilot_agent():
     tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_github_code, search_github_issues] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),
-         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
+         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request', 'github_project'], template=template)),
          MessagesPlaceholder(variable_name='agent_scratchpad'),
-         SystemMessage('Fulfill the user request autonomously and provide the result, without asking for further input. If anything fails along the way, abort and provide a reason.')]
+         SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. If anything fails along the way, abort and provide a reason.')]
     )
     agent = create_openai_functions_agent(llm, tools, prompt)
     return AgentExecutor(agent=agent, tools=tools, verbose=settings.DEBUG)

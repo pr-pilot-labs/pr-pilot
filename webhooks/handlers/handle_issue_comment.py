@@ -15,6 +15,7 @@ def handle_issue_comment(payload: dict):
     commenter_username = payload['comment']['user']['login']
     issue_number = payload['issue']['number']
     comment_id = payload['comment']['id']
+    comment_url = payload['comment']['html_url']
     repository = payload['repository']['full_name']
     installation_id = payload['installation']['id']
 
@@ -46,7 +47,7 @@ User comment:
 Read the {issue_or_pr}, fulfill the user's request and return your response to the user's comment.
 """
         task_args = dict(title=f"Respond to {issue_or_pr} #{issue_number}", user_request=user_request,
-                         issue_number=issue_number, comment_id=comment_id,
+                         issue_number=issue_number, comment_id=comment_id, comment_url=comment_url,
                          installation_id=installation_id, github_project=repository,
                          github_user=commenter_username, branch="main")
         if issue.pull_request:

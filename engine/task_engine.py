@@ -108,7 +108,7 @@ class TaskEngine:
             # Make sure we never work directly on the main branch
             if self.project.active_branch == self.project.main_branch:
                 raise ValueError(f"Cannot work on the main branch {self.project.main_branch}.")
-            executor_result = self.executor.invoke({"user_request": self.task.user_request})
+            executor_result = self.executor.invoke({"user_request": self.task.user_request, "github_project": self.task.github_project})
             self.task.result = executor_result['output']
             self.task.status = "completed"
             final_response = executor_result['output']
@@ -143,7 +143,10 @@ class TaskEngine:
             logger.info(f"Responding to user's comment on PR {self.task.pr_number}")
             pr = self.github_repo.get_pull(self.task.pr_number)
             try:
-                pr.create_review_comment_reply(self.task.comment_id, final_response)
+                comment = pr.create_review_comment_reply(self.task.comment_id, final_response)
+                self.task.response_comment_id = comment.id
+                self.task.response_comment_url = comment.html_url
+                self.task.save()
             except GithubException as e:
                 if e.status == 404:
                     pr.create_issue_comment(final_response)
@@ -153,7 +156,10 @@ class TaskEngine:
             # Respond to the user's comment on the issue
             logger.info(f"Responding to user's comment on issue {self.task.issue_number}")
             issue = self.github_repo.get_issue(self.task.issue_number)
-            issue.create_comment(final_response)
+            comment = issue.create_comment(final_response)
+            self.task.response_comment_id = comment.id
+            self.task.response_comment_url = comment.html_url
+            self.task.save()
         return final_response
 
     def clone_github_repo(self):

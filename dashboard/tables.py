@@ -36,15 +36,20 @@ class TaskTable(tables.Table):
     github_project = GithubProjectLinkColumn()
     status = TaskStatusColumn()
 
+
     def render_title(self, value):
         # Truncate the title to 50 characters
         return value[:50] + '...' if len(value) > 50 else value
+
+    def render_issue_number(self, record):
+        issue_number = record.issue_number if record.issue_number else record.pr_number
+        return format_html(f'<a href="{record.comment_url}" target="_blank">#{issue_number}</a>')
 
     class Meta:
         model = Task
         order_by = ('-created',)
         template_name = "django_tables2/bootstrap5.html"
-        fields = ("created", "title", "status", "github_project")
+        fields = ("created", "title", "status", "github_project", "issue_number")
 
 class EventTable(tables.Table):
     message = MarkdownColumn()

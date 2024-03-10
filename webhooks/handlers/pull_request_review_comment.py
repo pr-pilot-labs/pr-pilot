@@ -15,6 +15,7 @@ def handle_pull_request_review_comment(payload):
     # Extract commenter's username
     commenter_username = payload['comment']['user']['login']
     comment_id = payload['comment']['id']
+    comment_url = payload['comment']['html_url']
     pr_number = payload['pull_request']['number']
     head = payload['pull_request']['head']['ref']
     base = payload['pull_request']['base']['ref']
@@ -60,7 +61,7 @@ def handle_pull_request_review_comment(payload):
     Read the pull request, fulfill the user's request and return the response to the user's comment.
     """
         Task.schedule(title=command, user_request=user_request, comment_id=comment_id,
-                      pr_number=pr_number, head=head, base=base,
+                      comment_url=comment_url, pr_number=pr_number, head=head, base=base,
                       installation_id=installation_id, github_project=repository,
                       github_user=commenter_username, branch="main")
 

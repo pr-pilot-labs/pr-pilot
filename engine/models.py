@@ -31,6 +31,9 @@ class Task(models.Model):
     head = models.CharField(max_length=200, blank=True, null=True)
     base = models.CharField(max_length=200, blank=True, null=True)
     comment_id = models.IntegerField()
+    comment_url = models.CharField(max_length=200, blank=True, null=True)
+    response_comment_id = models.IntegerField(blank=True, null=True)
+    response_comment_url = models.CharField(max_length=200, blank=True, null=True)
     result = models.TextField(blank=True)
 
     def __str__(self):

@@ -3,6 +3,7 @@
 {% block content %}
     <h1>{{task.title }}</h1>
     <p>
+        <a class="btn btn-primary btn-sm" title="View original comment on Github" href="{{task.comment_url}}" target="_blank"><i class="fa-solid fa-comment"></i></a>
         {% if task.status == 'running' %}
             <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
         {% endif %}
@@ -17,6 +18,9 @@
         {% endif %}
         <span class="text-muted">{{ task.created }}</span>
     </p>
+    <div class="">
+
+    </div>
     <div class="lead p-3">
         {{ task_result }}
     </div>
