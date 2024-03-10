@@ -21,4 +21,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run uwsgi
-CMD ["python", "manage.py", "run_task", "$TASK_ID"]
+CMD python manage.py run_task $TASK_ID

@@ -98,6 +98,8 @@ class TaskEngine:
 
 
     def run(self) -> str:
+        self.task.status = "running"
+        self.task.save()
         self.clone_github_repo()
         self.generate_task_title()
         working_branch = None

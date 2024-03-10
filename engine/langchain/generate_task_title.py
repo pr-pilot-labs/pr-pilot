@@ -4,12 +4,22 @@ from django.conf import settings
 from langchain_community.llms.openai import OpenAI
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
 
 logger = logging.getLogger(__name__)
 
 
 system_message = """
-We need to run a task based on a Github issue description and a user request.
+You generate titles for tasks.
+You will get a Github issue description and a user request and create a title for the task that needs to be done. 
+
+# Examples
+Here are examples of what good task titles look like
+
+- "Fix the broken login page"
+- "Add a new feature to the dashboard"
+- "Update the API documentation"
+- "Refactor the user management code"
 
 # Issue description
 {issue_description}
@@ -17,9 +27,7 @@ We need to run a task based on a Github issue description and a user request.
 # User request
 {user_request}
 
-The task title should be no more than 10 words!
-
-Title:
+Task Title:
 """
 prompt = PromptTemplate(
     template=system_message,
@@ -28,7 +36,7 @@ prompt = PromptTemplate(
 
 
 parser = StrOutputParser()
-model = OpenAI(model="gpt-3.5-turbo", openai_api_key=settings.OPENAI_API_KEY, temperature=0)
+model = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=settings.OPENAI_API_KEY, temperature=0)
 chain = prompt | model | parser
 
 

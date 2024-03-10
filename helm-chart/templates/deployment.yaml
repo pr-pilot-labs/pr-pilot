@@ -7,10 +7,12 @@ spec:
   selector:
     matchLabels:
       app: pr-pilot
+      tier: api
   template:
     metadata:
       labels:
         app: pr-pilot
+        tier: api
     spec:
       volumes:
         - name: pem-volume
@@ -75,6 +77,7 @@ metadata:
 spec:
   selector:
     app: pr-pilot
+    tier: api
   ports:
   - protocol: TCP
     port: 80
