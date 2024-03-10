@@ -2,12 +2,18 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ job_name }}
-  labels: {{ labels | tojson }}
+  labels:
+    task_id: "{{ task_id }}"
+    github_project_org: "{{ github_project_org }}"
+    github_project_name: "{{ github_project_name }}"
+    github_user: "{{ github_user }}"
+    branch: "{{ branch }}"
 spec:
-  ttlSecondsAfterFinished: 7200  # 2 hours = 7200 seconds
+  ttlSecondsAfterFinished: 3600  # 1 hour = 3600 seconds
   backoffLimit: 4
   template:
     spec:
+      restartPolicy: Never  # Moved here
       volumes:
       - name: pem-volume
         secret:
@@ -33,6 +39,4 @@ spec:
           value: "{{ task_id }}"
         envFrom:
         - secretRef:
-          name: pr-pilot-secret
-        restartPolicy: Never
-
+            name: pr-pilot-secret  # Make sure this is correctly indented
