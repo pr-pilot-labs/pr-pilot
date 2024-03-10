@@ -18,8 +18,7 @@ class UserBudget(models.Model):
 
     @staticmethod
     def get_user_budget(username):
-        budget = UserBudget.objects.get(username=username)
-        if not budget:
+        try:
+            return UserBudget.objects.get(username=username)
+        except UserBudget.DoesNotExist:
             return UserBudget.objects.create(username=username)
-        return budget
-
