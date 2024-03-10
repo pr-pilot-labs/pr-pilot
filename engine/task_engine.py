@@ -58,7 +58,6 @@ class TaskEngine:
         self.project.checkout_latest_default_branch()
         tool_branch = self.create_unique_branch_name(branch_name_basis)
         logger.info(f"Creating new local branch '{tool_branch}'...")
-        TaskEvent.add(actor="assistant", action="create_branch", target=tool_branch)
         self.project.create_new_branch(tool_branch)
         return tool_branch
 
@@ -82,7 +81,6 @@ class TaskEngine:
             logger.info(f"No changes on {branch_name} branch. Deleting...")
             self.project.checkout_latest_default_branch()
             self.project.delete_branch(branch_name)
-            TaskEvent.add(actor="assistant", action="delete_branch", target=branch_name, message="No changes were made")
             return False
 
     def generate_task_title(self):
@@ -156,7 +154,6 @@ class TaskEngine:
             logger.info(f"Responding to user's comment on issue {self.task.issue_number}")
             issue = self.github_repo.get_issue(self.task.issue_number)
             issue.create_comment(final_response)
-        TaskEvent.add(actor="assistant", action="run_task", target=self.task.title, message=final_response, transaction="end")
         return final_response
 
     def clone_github_repo(self):

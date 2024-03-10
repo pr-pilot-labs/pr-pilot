@@ -129,14 +129,20 @@ def search_github_code(query: str, sort: Optional[str], order: Optional[str], hi
     g = Task.current().github
     # Force query to use the repository name
     query = f"{query} repo:{Task.current().github_project}"
+
     results = g.search_code(query, sort=sort, order=order, highlight=highlight)
     if not results.totalCount:
+        TaskEvent.add(actor="assistant", action="search_code", message=f"Searched code with query: `{query}`. No results.")
         return "No code found"
+
     response = ""
+    relevant_files = ""
     for result in results:
+        relevant_files += f"- `{result.path}`\n"
         for match in result.text_matches:
             response += f"**Match in `{result.path}`**\n"
             response += f"```\n{match['fragment']}\n```\n\n"
+    TaskEvent.add(actor="assistant", action="search_code", message=f"Searched code with query: `{query}`. Found {results.totalCount} results:\n\n{relevant_files}")
     return response
 
 
@@ -152,12 +158,13 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
     query = f"{query} repo:{Task.current().github_project}"
     results = g.search_issues(query, sort=sort, order=order)
     if not results.totalCount:
+        TaskEvent.add(actor="assistant", action="search_issues", message=f"Searched issues with query: `{query}`. No results.")
         return "No issues found"
     response = ""
     for result in results:
         response += f"**Issue #{result.number}**\n"
-        response += f"{result.title}\n"
-        response += f"{result.html_url}\n\n"
+        response += f"[{result.title}]({result.html_url})\n\n"
+    TaskEvent.add(actor="assistant", action="search_issues", message=f"Searched issues with query: `{query}`. Found {results.totalCount} results:\n\n{response}")
     return response
 
 

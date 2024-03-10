@@ -11,7 +11,7 @@ metadata:
     branch: "{{ branch }}"
 spec:
   ttlSecondsAfterFinished: 3600  # 1 hour = 3600 seconds
-  backoffLimit: 4
+  backoffLimit: 1
   template:
     spec:
       restartPolicy: Never  # Moved here
