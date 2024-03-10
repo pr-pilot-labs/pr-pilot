@@ -18,11 +18,6 @@ from webhooks.jwt_tools import get_installation_access_token
 
 logger = logging.getLogger(__name__)
 
-# Initialize model
-gpt_4_turbo = ChatOpenAI(model="gpt-4-turbo-preview", openai_api_key=settings.OPENAI_API_KEY, temperature=0)
-gpt_4 = ChatOpenAI(model="gpt-4", openai_api_key=settings.OPENAI_API_KEY, temperature=0)
-gpt_3_5_turbo = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=settings.OPENAI_API_KEY, temperature=0)
-
 class TaskEngine:
 
     def __init__(self, task: Task, max_steps=5):

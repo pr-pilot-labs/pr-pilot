@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% load render_table from django_tables2 %}
 {% block content %}
-    <h1>Task  {{task.title }}</h1>
-
+    <h1>{{task.title }}</h1>
+    <p class="lead">{{ task_result }}</p>
+    <h3>Event Log</h3>
     {% render_table event_table %}
+
+    <h3>Cost: ${{ total_cost|floatformat:3 }} </h3>
+    {% render_table cost_item_table %}
 {% endblock %}

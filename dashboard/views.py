@@ -1,10 +1,12 @@
+import markdown
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.safestring import mark_safe
 from django.views.generic import DetailView
 from django_tables2 import SingleTableView
 
-from dashboard.tables import TaskTable, EventTable
+from dashboard.tables import TaskTable, EventTable, CostItemTable
 from engine.models import Task
 
 
@@ -48,4 +50,7 @@ class TaskDetailView(DetailView, LoginRequiredMixin):
         task = context['task']
         # Create an EventTable instance with the task's events
         context['event_table'] = EventTable(task.events.all())
+        context['cost_item_table'] = CostItemTable(task.cost_items.all())
+        context['task_result'] = mark_safe(markdown.markdown(task.result))
+        context['total_cost'] = sum([item.total_cost_usd for item in task.cost_items.all()])
         return context

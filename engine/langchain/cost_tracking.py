@@ -9,7 +9,7 @@ from langchain_community.callbacks.openai_info import standardize_model_name, MO
     get_openai_token_cost_for_model, OpenAICallbackHandler
 from langchain_core.outputs import LLMResult
 
-from engine.models import CostItem
+from engine.models import CostItem, Task
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,8 @@ class CostTrackerCallback(OpenAICallbackHandler):
                                     requests=self.successful_requests,
                                     completion_token_count=self.completion_tokens,
                                     model_name=self.model_name,
-                                    prompt_token_count=self.prompt_tokens)
+                                    prompt_token_count=self.prompt_tokens,
+                                    task=Task.current())
             logger.info(f"Recording cost item for {cost_item} [prompt_tokens={self.prompt_tokens}, completion_tokens={self.completion_tokens}, cost=${self.total_cost}]")
             self.prompt_tokens = 0
             self.total_cost = 0
