@@ -9,6 +9,10 @@ class UserBudget(models.Model):
     username = models.CharField(max_length=200)
     budget = models.DecimalField(max_digits=10, decimal_places=2, default=5)
 
+    @property
+    def formatted(self):
+        return f'{self.budget:.2f}'
+
     def __str__(self):
         return f"Budget {self.username} - ${self.budget}"
 

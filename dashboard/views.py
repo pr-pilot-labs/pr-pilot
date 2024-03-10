@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from django.views.generic import DetailView
 from django_tables2 import SingleTableView
 
+from accounts.models import UserBudget
 from dashboard.tables import TaskTable, EventTable, CostItemTable
 from engine.models import Task
 
@@ -19,6 +20,13 @@ class TaskListView(SingleTableView, LoginRequiredMixin):
     def get_queryset(self):
         # Filter the tasks by the logged-in user's ID
         return Task.objects.filter(github_user=self.request.user.username)
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        budget = UserBudget.get_user_budget(self.request.user.username)
+        context['budget'] = budget.formatted
+        return context
 
 class TaskDetailView(DetailView, LoginRequiredMixin):
     model = Task
@@ -49,6 +57,8 @@ class TaskDetailView(DetailView, LoginRequiredMixin):
         # Get the task from the context
         task = context['task']
         # Create an EventTable instance with the task's events
+        budget = UserBudget.get_user_budget(self.request.user.username)
+        context['budget'] = budget.formatted
         context['event_table'] = EventTable(task.events.all())
         context['cost_item_table'] = CostItemTable(task.cost_items.all())
         context['task_result'] = mark_safe(markdown.markdown(task.result))
