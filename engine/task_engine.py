@@ -101,6 +101,7 @@ class TaskEngine:
         working_branch = None
         # If task is a PR, checkout the PR branch
         if self.task.pr_number:
+            TaskEvent.add(actor="assistant", action="checkout_pr_branch", target=self.task.head, message="Checking out PR branch")
             self.project.checkout_branch(self.task.head)
         else:
             working_branch = self.setup_working_branch(self.task.title)
@@ -163,6 +164,7 @@ class TaskEngine:
         return final_response
 
     def clone_github_repo(self):
+        TaskEvent.add(actor="assistant", action="clone_repo", target=self.task.github_project, message="Cloning repository")
         logger.info(f"Cloning repo {self.task.github_project} to {settings.REPO_DIR}")
         if os.path.exists(settings.REPO_DIR):
             logger.info(f"Deleting existing directory contents.")

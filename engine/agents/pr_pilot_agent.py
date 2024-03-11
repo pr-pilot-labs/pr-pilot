@@ -38,16 +38,22 @@ You can search the code base using the `search_github_code` function. It uses th
 Use this function to find out more about classes/functions/files/etc mentioned in the user request.
 
 ## Example 1: Search for `initMap` function in JavaScript files
-`initMap language:javascript`
+`symbol:initMap language:javascript`
 
-## Example 2: Find instances of `dependencyInjection`
-`dependencyInjection`
+## Example 2: Find all `WithContext` functions in Go files
+`language:go symbol:WithContext`
 
 ## Example 3: Locate `TODO` comments in Python files
 `TODO language:python`
 
 ## Example 4: Search for `NullPointerException` in Java files
 `NullPointerException language:java`
+
+## Example 5: Find all JavaScript files in the `src` directory and its subdirectories
+`path:/src/**/*.js`
+
+## Example 6: FInd all files with the `.txt` extension
+`path:*.txt`
 
 
 # How to talk to WebSearchAgent
@@ -145,7 +151,7 @@ def search_github_code(query: str, sort: Optional[str], order: Optional[str]):
     """
     g = Task.current().github
     # Force query to use the repository name
-    query = f"{query} repo:{Task.current().github_project}"
+    query = f"repo:{Task.current().github_project} {query}"
 
     results = g.search_code(query, sort=sort, order=order)
     if not results.totalCount:
