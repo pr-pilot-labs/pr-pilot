@@ -126,7 +126,8 @@ class TaskEngine:
             self.task.status = "failed"
             self.task.result = str(e)
             logger.error("Failed to run task", exc_info=e)
-            final_response = f"I'm sorry, something went wrong, please check [Your Dashboard](https:/app.pr-pilot.ai) for details."
+            dashboard_link = f"[Your Dashboard](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)"
+            final_response = f"I'm sorry, something went wrong, please check {dashboard_link} for details."
         finally:
             self.task.save()
             total_cost = CostItem.objects.filter(task=self.task).aggregate(Sum('total_cost_usd'))['total_cost_usd__sum']
