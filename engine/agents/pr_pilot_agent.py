@@ -38,24 +38,25 @@ You can search the code base using the `search_github_code` function. It uses th
 Use this function to find out more about classes/functions/files/etc mentioned in the user request.
 
 ## Example 1: Search for `initMap` function in JavaScript files
-`initMap in:file language:javascript`
+`initMap language:javascript`
 
 ## Example 2: Find instances of `dependencyInjection`
-`dependencyInjection in:file`
+`dependencyInjection`
 
 ## Example 3: Locate `TODO` comments in Python files
-`TODO in:file language:python`
+`TODO language:python`
 
-## Example 4: Find usage of `getUserInfo` method
-`getUserInfo in:file`
-
-## Example 5: Search for `NullPointerException` in Java files
-`NullPointerException in:file language:java repo:example/repo`
+## Example 4: Search for `NullPointerException` in Java files
+`NullPointerException language:java`
 
 
 # How to talk to WebSearchAgent
 You can talk to the WebSearchAgent using the `talk_to_web_search_agent` function. Make sure to ask detailed, specific
 questions to get the best results. Use full sentences and give enough context.
+
+Examples:
+- "Visit URL <url> and tell me <what you want to know>"
+- "Search for <search query>, visit the top 3 results and answer my question: <what you want to know>"
 
 """ + AGENT_COMMUNICATION_RULES
 
@@ -136,19 +137,17 @@ def read_files(file_paths: list[str]):
 
 
 @tool
-def search_github_code(query: str, sort: Optional[str], order: Optional[str], highlight: bool = True):
+def search_github_code(query: str, sort: Optional[str], order: Optional[str]):
     """Search for code in the repository.
         :param query: Search query in Github search syntax
         :param sort: string ('indexed')
         :param order: string ('asc', 'desc')
-        :param highlight: boolean (True, False)
-        :param qualifiers: keyword dict query qualifiers
     """
     g = Task.current().github
     # Force query to use the repository name
     query = f"{query} repo:{Task.current().github_project}"
 
-    results = g.search_code(query, sort=sort, order=order, highlight=highlight)
+    results = g.search_code(query, sort=sort, order=order)
     if not results.totalCount:
         TaskEvent.add(actor="assistant", action="search_code", message=f"Searched code with query: `{query}`. No results.")
         return "No code found"
