@@ -96,8 +96,8 @@ class TaskEngine:
     def run(self) -> str:
         self.task.status = "running"
         self.task.save()
-        self.clone_github_repo()
         self.generate_task_title()
+        self.clone_github_repo()
         working_branch = None
         # If task is a PR, checkout the PR branch
         if self.task.pr_number:
@@ -122,6 +122,7 @@ class TaskEngine:
                 pr = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
                                                                head=working_branch, labels=pr_info.labels)
                 final_response += f"\n\nPull request has been created: [#{pr.number}]({pr.html_url})"
+            final_response += f"\n\n[Task Log](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)"
         except Exception as e:
             self.task.status = "failed"
             self.task.result = str(e)

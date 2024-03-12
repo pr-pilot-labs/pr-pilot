@@ -12,7 +12,7 @@ from engine.models import Task
 
 
 # Create your views here.
-class TaskListView(SingleTableView, LoginRequiredMixin):
+class TaskListView(LoginRequiredMixin, SingleTableView):
     model = Task
     table_class = TaskTable
     template_name = 'task_list.html'
@@ -28,7 +28,7 @@ class TaskListView(SingleTableView, LoginRequiredMixin):
         context['budget'] = budget.formatted
         return context
 
-class TaskDetailView(DetailView, LoginRequiredMixin):
+class TaskDetailView(LoginRequiredMixin, DetailView):
     model = Task
     template_name = 'task_detail.html'
     context_object_name = 'task'

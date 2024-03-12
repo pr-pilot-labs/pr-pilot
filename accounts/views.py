@@ -2,6 +2,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 
 @login_required
@@ -17,7 +18,7 @@ def home(request):
         # Redirect to dashboard
         return redirect('task_list')
     else:
-        return render(request, 'home.html')
+        return redirect('/accounts/github/login/?method=oauth2')
 
 
 def health_check(request):
