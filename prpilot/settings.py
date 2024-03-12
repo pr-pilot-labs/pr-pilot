@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
+import sentry_sdk
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'django_prometheus',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -51,7 +52,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -60,7 +60,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
-    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
@@ -217,3 +216,14 @@ MAX_FILE_LINES = 600
 MAX_FILE_SEARCH_RESULTS = 50
 MAX_READ_FILES = 5
 IGNORE_FILE_PATH = Path(os.getcwd()) / ".pilotignore"
+
+sentry_sdk.init(
+    dsn="https://ada4f090ac744c5c947d9d9363d75a29@o4506900506279936.ingest.us.sentry.io/4506900507262976",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)

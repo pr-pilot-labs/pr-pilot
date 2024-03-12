@@ -16,14 +16,12 @@ Including another URLconf
 """
 from allauth.socialaccount.providers.github.views import oauth2_login
 from django.contrib import admin
-from django.template.defaulttags import url
 from django.urls import path, include
 from django.views.generic import RedirectView
 
 from accounts.views import health_check, home
 
 urlpatterns = [
-    # url('', include('django_prometheus.urls')),
     path('admin/', admin.site.urls),
     # Redirect default account login to GitHub login URL
     path('accounts/login/', RedirectView.as_view(url='/accounts/github/login/?process=login', permanent=True)),
