@@ -29,7 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 system_message = """
-You are PR Pilot, an AI agent that works on Github issues and PRs.
+You are PR Pilot, an AI collaborator on the `{github_project}` Github Project.
+You will receive a user request related to an issue or PR on the project.
+Your job is to fulfill the user request autonomously and provide the response.
+All issues, PR, files and code you have access to are in the context of the `{github_project}` repository.
 
 # How to handle files
 - Reading files is EXPENSIVE. Only read the files you really need to solve the task
@@ -69,9 +72,6 @@ Examples:
 """ + AGENT_COMMUNICATION_RULES
 
 template = """
-# Name of the Github project this request is from
-{github_project}
-
 # User Request
 
 {user_request}
@@ -174,7 +174,7 @@ def search_github_code(query: str, sort: Optional[str], order: Optional[str]):
     return response
 
 @tool
-def search_with_ripgrep(search_pattern: str, path: str, file_type: str = None) -> str:
+def search_with_ripgrep(search_pattern: str, file_type: str = None) -> str:
     """
     Search for a pattern in files using ripgrep.
 
@@ -189,12 +189,13 @@ def search_with_ripgrep(search_pattern: str, path: str, file_type: str = None) -
     command = f"rg -n {shlex.quote(search_pattern)} {shlex.quote(str(settings.REPO_DIR))}"
     if file_type:
         command += f" -t {file_type}"
-
+    TaskEvent.add(actor="assistant", action="search_code", message=f"Searching code for pattern: `{search_pattern}`.")
     try:
         result = subprocess.run(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         if result.returncode == 0 and result.stdout:
             result = result.stdout.strip()
-            max_100_lines = result.split("\n")[:100]
+            root_path_replaced = result.replace(str(settings.REPO_DIR), "")
+            max_100_lines = root_path_replaced.split("\n")[:150]
             return "\n".join(max_100_lines)
         else:
             return "No matches found or an error occurred."
@@ -228,8 +229,8 @@ def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
     tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_with_ripgrep, search_github_issues] + file_tools
     prompt = ChatPromptTemplate.from_messages(
-        [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),
-         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request', 'github_project'], template=template)),
+        [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project'], template=system_message)),
+         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
          MessagesPlaceholder(variable_name='agent_scratchpad'),
          SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. If anything fails along the way, abort and provide a reason.')]
     )
