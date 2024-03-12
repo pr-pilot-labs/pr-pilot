@@ -10,13 +10,6 @@ spec:
   - host: app.pr-pilot.ai
     http:
       paths:
-      - path: /metrics
-        pathType: Prefix
-        backend:
-          service:
-            name: nginx-static-svc
-            port:
-              number: 80
       - path: /static/
         pathType: Prefix
         backend:
