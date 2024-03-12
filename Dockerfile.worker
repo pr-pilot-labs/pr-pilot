@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Install git
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install -y git ripgrep && \
     rm -rf /var/lib/apt/lists/*
 
 # Set work directory

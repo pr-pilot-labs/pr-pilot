@@ -1,4 +1,6 @@
 import logging
+import shlex
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -171,6 +173,34 @@ def search_github_code(query: str, sort: Optional[str], order: Optional[str]):
     TaskEvent.add(actor="assistant", action="search_code", message=f"Searched code with query: `{query}`. Found {results.totalCount} results:\n\n{relevant_files}")
     return response
 
+@tool
+def search_with_ripgrep(search_pattern: str, path: str, file_type: str = None) -> str:
+    """
+    Search for a pattern in files using ripgrep.
+
+    Args:
+    - search_pattern: The regex pattern to search for.
+    - path: The path to search within. Can be a file or a directory.
+    - file_type: Optionally, a file type to limit the search to (e.g., 'py' for Python files).
+
+    Returns:
+    A list of search results
+    """
+    command = f"rg -n {shlex.quote(search_pattern)} {shlex.quote(str(settings.REPO_DIR))}"
+    if file_type:
+        command += f" -t {file_type}"
+
+    try:
+        result = subprocess.run(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        if result.returncode == 0 and result.stdout:
+            result = result.stdout.strip()
+            max_100_lines = result.split("\n")[:100]
+            return "\n".join(max_100_lines)
+        else:
+            return "No matches found or an error occurred."
+    except Exception as e:
+        return f"An error occurred while running ripgrep: {e}"
+
 
 @tool
 def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
@@ -196,7 +226,7 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
 
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_github_code, search_github_issues] + file_tools
+    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_with_ripgrep, search_github_issues] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=[], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request', 'github_project'], template=template)),
