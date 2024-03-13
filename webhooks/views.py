@@ -5,16 +5,12 @@ import logging
 
 from django.conf import settings
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 
 from webhooks.handlers.app_deletion import handle_app_deletion
 from webhooks.handlers.app_installation import handle_app_installation
 from webhooks.handlers.handle_issue_comment import handle_issue_comment
 from webhooks.handlers.pull_request_review_comment import handle_pull_request_review_comment
-from webhooks.models import GitHubAppInstallation, GitHubAccount
-
 
 logger = logging.getLogger(__name__)
 

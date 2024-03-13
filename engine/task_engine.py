@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db.models import Sum
 from git import Repo
 from github import Github, GithubException
-from langchain_openai import ChatOpenAI
+from github.PullRequest import PullRequest
 
 from accounts.models import UserBudget
 from engine.agents.pr_pilot_agent import create_pr_pilot_agent
@@ -94,15 +94,20 @@ class TaskEngine:
 
 
     def run(self) -> str:
+        initial_response = f"⌛ I'm on it! Track my progress in the [Dashboard](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/). I'll update this comment when I'm done..."
+        if self.task.pr_number:
+            response_comment = self.reply_to_pr_comment(initial_response)
+        else:
+            response_comment = self.reply_to_issue_comment(initial_response)
         self.task.status = "running"
         self.task.save()
         self.generate_task_title()
         self.clone_github_repo()
-        working_branch = None
         # If task is a PR, checkout the PR branch
         if self.task.pr_number:
             TaskEvent.add(actor="assistant", action="checkout_pr_branch", target=self.task.head, message="Checking out PR branch")
             self.project.checkout_branch(self.task.head)
+            working_branch = self.task.head
         else:
             working_branch = self.setup_working_branch(self.task.title)
         try:
@@ -113,16 +118,21 @@ class TaskEngine:
             self.task.result = executor_result['output']
             self.task.status = "completed"
             final_response = executor_result['output']
-            if working_branch and self.finalize_working_branch(working_branch):
-                # We have changes, create a PR
+            if working_branch and self.task.pr_number:
+                # We are working on an existing PR
+                if self.project.get_diff_to_main():
+                    logger.info(f"Found changes on {working_branch!r} branch. Pushing ...")
+                    self.project.push_branch(working_branch)
+            elif working_branch and self.finalize_working_branch(working_branch):
+                # We are working on a new branch and have changes to push
                 logger.info(f"Creating pull request for branch {working_branch}")
                 pr_info = generate_pr_info(final_response)
                 if not pr_info:
                     pr_info = LabelsAndTitle(title=self.task.title, labels=["darwin"])
-                pr = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
+                pr: PullRequest = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
                                                                head=working_branch, labels=pr_info.labels)
-                final_response += f"\n\nPull request has been created: [#{pr.number}]({pr.html_url})"
-            final_response += f"\n\n[Task Log](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)"
+                final_response += f"\n\n**PR**: [{pr.title}]({pr.html_url})\n\nIf you require further changes, continue our conversation over there!"
+            final_response += f"\n\n📋[Task Log](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)"
         except Exception as e:
             self.task.status = "failed"
             self.task.result = str(e)
@@ -140,30 +150,35 @@ class TaskEngine:
                 budget.save()
             else:
                 logger.warning(f"No cost items found for task {self.task.title}")
-        if self.task.pr_number:
-            # Respond to the user's comment on the PR
-            self.project.push_branch(self.task.head)
-            logger.info(f"Responding to user's comment on PR {self.task.pr_number}")
-            pr = self.github_repo.get_pull(self.task.pr_number)
-            try:
-                comment = pr.create_review_comment_reply(self.task.comment_id, final_response)
-                self.task.response_comment_id = comment.id
-                self.task.response_comment_url = comment.html_url
-                self.task.save()
-            except GithubException as e:
-                if e.status == 404:
-                    pr.create_issue_comment(final_response)
-                else:
-                    raise
-        elif self.task.issue_number:
-            # Respond to the user's comment on the issue
-            logger.info(f"Responding to user's comment on issue {self.task.issue_number}")
-            issue = self.github_repo.get_issue(self.task.issue_number)
-            comment = issue.create_comment(final_response)
-            self.task.response_comment_id = comment.id
-            self.task.response_comment_url = comment.html_url
-            self.task.save()
+        response_comment.edit(final_response)
         return final_response
+
+    def reply_to_issue_comment(self, message):
+        # Respond to the user's comment on the issue
+        logger.info(f"Responding to user's comment on issue {self.task.issue_number}")
+        issue = self.github_repo.get_issue(self.task.issue_number)
+        comment = issue.create_comment(message)
+        self.task.response_comment_id = comment.id
+        self.task.response_comment_url = comment.html_url
+        self.task.save()
+        return comment
+
+    def reply_to_pr_comment(self, message):
+        # Respond to the user's comment on the PR
+        self.project.push_branch(self.task.head)
+        logger.info(f"Responding to user's comment on PR {self.task.pr_number}")
+        pr = self.github_repo.get_pull(self.task.pr_number)
+        try:
+            comment = pr.create_review_comment_reply(self.task.comment_id, message)
+        except GithubException as e:
+            if e.status == 404:
+                comment = pr.create_issue_comment(message)
+            else:
+                raise
+        self.task.response_comment_id = comment.id
+        self.task.response_comment_url = comment.html_url
+        self.task.save()
+        return comment
 
     def clone_github_repo(self):
         TaskEvent.add(actor="assistant", action="clone_repo", target=self.task.github_project, message="Cloning repository")
