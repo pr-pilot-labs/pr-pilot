@@ -3,7 +3,6 @@
 {% block content %}
     <h1>{{task.title }}</h1>
     <p>
-        <a class="btn btn-primary btn-sm" title="View original comment on Github" href="{{task.comment_url}}" target="_blank"><i class="fa-solid fa-comment"></i></a>
         {% if task.status == 'running' %}
             <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
         {% endif %}
@@ -26,6 +25,7 @@
     </div>
     {% render_table event_table %}
 
-    <h3>Cost: ${{ total_cost|floatformat:3 }} </h3>
+    <h3><i class="fa-solid fa-coins"></i> {{ total_cost|floatformat:1 }} Credits Used </h3>
     {% render_table cost_item_table %}
+    <a class="btn btn-primary" title="View original comment on Github" href="{{task.comment_url}}"><i class="fa-solid fa-arrow-up-right-from-square"></i> Show on Github</a>
 {% endblock %}

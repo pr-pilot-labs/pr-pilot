@@ -216,6 +216,7 @@ MAX_FILE_LINES = 600
 MAX_FILE_SEARCH_RESULTS = 50
 MAX_READ_FILES = 5
 IGNORE_FILE_PATH = Path(os.getcwd()) / ".pilotignore"
+CREDIT_MULTIPLIER = 2
 
 sentry_sdk.init(
     dsn="https://ada4f090ac744c5c947d9d9363d75a29@o4506900506279936.ingest.us.sentry.io/4506900507262976",

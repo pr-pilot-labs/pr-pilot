@@ -95,5 +95,9 @@ class CostItem(models.Model):
     total_cost_usd = models.FloatField()
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="cost_items", null=True)
 
+    @property
+    def credits(self):
+        return self.total_cost_usd * float(settings.CREDIT_MULTIPLIER) * float(100)
+
     def __str__(self):
         return f"{self.title} - ${self.total_cost_usd}"

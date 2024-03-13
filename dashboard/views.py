@@ -62,5 +62,5 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         context['event_table'] = EventTable(task.events.all())
         context['cost_item_table'] = CostItemTable(task.cost_items.all())
         context['task_result'] = mark_safe(markdown.markdown(task.result))
-        context['total_cost'] = sum([item.total_cost_usd for item in task.cost_items.all()])
+        context['total_cost'] = sum([item.credits for item in task.cost_items.all()])
         return context

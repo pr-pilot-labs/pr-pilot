@@ -68,11 +68,11 @@ class CostItemTable(tables.Table):
     def render_model_name(self, value):
         return format_html('<span class="badge bg-secondary">{}</span>', value)
 
-    def render_total_cost_usd(self, value):
-        usd_string = '${:.3f}'.format(value)
+    def render_credits(self, value):
+        usd_string = '{:.1f}'.format(value)
         return usd_string
 
     class Meta:
         model = CostItem
         template_name = "django_tables2/bootstrap5.html"
-        fields = ['title', 'model_name', 'total_cost_usd']
+        fields = ['title', 'model_name', 'credits']
