@@ -93,7 +93,7 @@ class Project(BaseModel):
         # Get the repository where you want to create the pull request
         repo = g.get_repo(Task.current().github_project)
         logger.info(f"Creating pull request from {head} to {self.main_branch}")
-        labels.append("darwin")
+        labels.append("pr-pilot")
         pr = repo.create_pull(title=title, body=body, head=head, base=self.main_branch)
         pr.set_labels(*labels)
         TaskEvent.add(actor="assistant", action="create_pull_request", target=head,

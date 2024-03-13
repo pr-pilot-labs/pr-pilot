@@ -216,7 +216,7 @@ class CreateGithubIssue(BasicTool):
         state["status_message"] = f"Creating Github Issue"
         g = Task.current().github
         repo = g.get_repo(Task.current().github_project)
-        self.labels.append("darwin")
+        self.labels.append("pr-pilot")
         try:
             issue = repo.create_issue(title=self.title, body=self.body, labels=self.labels)
         except GithubException as e:

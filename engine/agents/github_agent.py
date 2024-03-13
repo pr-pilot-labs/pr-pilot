@@ -104,8 +104,8 @@ def read_pull_request(pr_number: int):
 def create_github_issue(issue_title: str, issue_body: str, labels: List[str] = []):
     """Create a new issue on Github. Provide a fitting title, a detailed description and optional one-word, lowercase, alphanumeric labels."""
     g = Task.current().github
-    if 'darwin' not in labels:
-        labels.append('darwin')
+    if 'pr-pilot' not in labels:
+        labels.append('pr-pilot')
     repo = g.get_repo(Task.current().github_project)
     issue = repo.create_issue(title=issue_title, body=issue_body, labels=labels)
     TaskEvent.add(actor="assistant", action="create_github_issue", target=issue.title, message=f"Created issue [#{issue.number} {issue.title}]({issue.html_url})")

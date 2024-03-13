@@ -128,7 +128,7 @@ class TaskEngine:
                 logger.info(f"Creating pull request for branch {working_branch}")
                 pr_info = generate_pr_info(final_response)
                 if not pr_info:
-                    pr_info = LabelsAndTitle(title=self.task.title, labels=["darwin"])
+                    pr_info = LabelsAndTitle(title=self.task.title, labels=["pr-pilot"])
                 pr: PullRequest = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
                                                                head=working_branch, labels=pr_info.labels)
                 final_response += f"\n\n**PR**: [{pr.title}]({pr.html_url})\n\nIf you require further changes, continue our conversation over there!"
@@ -165,7 +165,6 @@ class TaskEngine:
 
     def reply_to_pr_comment(self, message):
         # Respond to the user's comment on the PR
-        self.project.push_branch(self.task.head)
         logger.info(f"Responding to user's comment on PR {self.task.pr_number}")
         pr = self.github_repo.get_pull(self.task.pr_number)
         try:
