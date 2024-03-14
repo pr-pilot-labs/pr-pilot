@@ -113,7 +113,7 @@ def write_file(path: str, complete_entire_file_content: str, commit_message: str
     """
     path = path.lstrip("/")
     file_system = FileSystem()
-    TaskEvent.add(actor="assistant", action="write_file", target=path)
+    TaskEvent.add(actor="assistant", action="write_file", target=path, message=commit_message)
     file_system.save(complete_entire_file_content, Path(path))
     Project.commit_all_changes(commit_message)
     return f"Successfully wrote content to `{path}`"
