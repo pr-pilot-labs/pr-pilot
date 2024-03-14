@@ -94,11 +94,6 @@ class TaskEngine:
 
 
     def run(self) -> str:
-        initial_response = f"⌛ I'm on it! Track my progress in the [Dashboard](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/). I'll update this comment when I'm done..."
-        if self.task.pr_number:
-            response_comment = self.reply_to_pr_comment(initial_response)
-        else:
-            response_comment = self.reply_to_issue_comment(initial_response)
         self.task.status = "running"
         self.task.save()
         self.generate_task_title()
@@ -150,34 +145,8 @@ class TaskEngine:
                 budget.save()
             else:
                 logger.warning(f"No cost items found for task {self.task.title}")
-        response_comment.edit(final_response)
+        self.task.response_comment.edit(final_response)
         return final_response
-
-    def reply_to_issue_comment(self, message):
-        # Respond to the user's comment on the issue
-        logger.info(f"Responding to user's comment on issue {self.task.issue_number}")
-        issue = self.github_repo.get_issue(self.task.issue_number)
-        comment = issue.create_comment(message)
-        self.task.response_comment_id = comment.id
-        self.task.response_comment_url = comment.html_url
-        self.task.save()
-        return comment
-
-    def reply_to_pr_comment(self, message):
-        # Respond to the user's comment on the PR
-        logger.info(f"Responding to user's comment on PR {self.task.pr_number}")
-        pr = self.github_repo.get_pull(self.task.pr_number)
-        try:
-            comment = pr.create_review_comment_reply(self.task.comment_id, message)
-        except GithubException as e:
-            if e.status == 404:
-                comment = pr.create_issue_comment(message)
-            else:
-                raise
-        self.task.response_comment_id = comment.id
-        self.task.response_comment_url = comment.html_url
-        self.task.save()
-        return comment
 
     def clone_github_repo(self):
         TaskEvent.add(actor="assistant", action="clone_repo", target=self.task.github_project, message="Cloning repository")
