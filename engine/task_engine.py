@@ -141,12 +141,12 @@ class TaskEngine:
             final_response = f"I'm sorry, something went wrong, please check {dashboard_link} for details."
         finally:
             self.task.save()
-            total_cost = CostItem.objects.filter(task=self.task).aggregate(Sum('total_cost_usd'))['total_cost_usd__sum']
+            total_cost = sum([item.credits for item in CostItem.objects.filter(task=self.task)])
             if total_cost:
-                logger.info(f"Total cost of task: ${total_cost}")
+                logger.info(f"Total cost of task: {total_cost} credits")
                 budget = UserBudget.get_user_budget(self.task.github_user)
                 budget.budget = budget.budget - Decimal(str(total_cost))
-                logger.info(f"Remaining budget for user {self.task.github_user}: ${budget.budget}")
+                logger.info(f"Remaining budget for user {self.task.github_user}: {budget.budget} credits")
                 budget.save()
             else:
                 logger.warning(f"No cost items found for task {self.task.title}")

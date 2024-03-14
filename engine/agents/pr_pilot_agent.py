@@ -113,8 +113,6 @@ def write_file(path: str, complete_entire_file_content: str, commit_message: str
     """
     path = path.lstrip("/")
     file_system = FileSystem()
-    # if file_system.get_node(Path(path)):
-    #     return f"File already exists: `{path}`. Not creating a new file."
     TaskEvent.add(actor="assistant", action="write_file", target=path)
     file_system.save(complete_entire_file_content, Path(path))
     Project.commit_all_changes(commit_message)
@@ -227,7 +225,7 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
 
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, create_directory, write_file, read_files, search_with_ripgrep, search_github_issues] + file_tools
+    tools = [read_github_issue, read_pull_request, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
