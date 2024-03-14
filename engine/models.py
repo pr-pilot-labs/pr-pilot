@@ -55,7 +55,7 @@ class Task(models.Model):
         new_task = Task(**kwargs, status="scheduled")
         repo = new_task.github.get_repo(new_task.github_project)
 
-        if not new_task.user_is_collaborator():
+        if not new_task.user_can_write():
             message = f"Sorry @{new_task.github_user}, you must be a collaborator of `{new_task.github_project}` to run commands on this project."
             if new_task.pr_number:
                 pr = repo.get_pull(new_task.pr_number)
@@ -87,9 +87,10 @@ class Task(models.Model):
             job.spawn()
         return new_task
 
-    def user_is_collaborator(self) -> bool:
+    def user_can_write(self) -> bool:
         repo = self.github.get_repo(self.github_project)
-        return repo.has_in_collaborators(self.github_user)
+        permission = repo.get_collaborator_permission(self.github_user)
+        return permission == 'write' or permission == 'admin'
 
 
 class TaskEvent(models.Model):
