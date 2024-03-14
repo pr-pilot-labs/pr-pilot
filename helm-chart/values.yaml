@@ -1,4 +1,4 @@
-replicas: 2
+replicas: 5
 
 image:
   repository: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app

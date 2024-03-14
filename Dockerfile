@@ -1,4 +1,3 @@
-# Use an official Python runtime as a parent image
 FROM python:3.11-slim
 
 # Set environment variables
@@ -12,6 +11,10 @@ RUN apt-get update && apt-get install -y \
     libpcre3-dev \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && \
+    apt-get install -y --only-upgrade openssl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set work directory
 WORKDIR /usr/src/app
