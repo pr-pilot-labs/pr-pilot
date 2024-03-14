@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import jwt
 import time
 import requests
@@ -33,7 +35,8 @@ def generate_jwt(app_id, private_key_path):
 
     return encoded_jwt
 
-# Authenticate as a GitHub App
+
+@lru_cache
 def get_installation_access_token(installation_id):
     jwt_token = generate_jwt(int(settings.GITHUB_APP_ID), settings.PRIVATE_KEY_PATH)
     headers = {
