@@ -36,7 +36,6 @@ def generate_jwt(app_id, private_key_path):
     return encoded_jwt
 
 
-@lru_cache
 def get_installation_access_token(installation_id):
     jwt_token = generate_jwt(int(settings.GITHUB_APP_ID), settings.PRIVATE_KEY_PATH)
     headers = {
