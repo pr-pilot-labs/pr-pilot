@@ -17,8 +17,7 @@ class Project(BaseModel):
     def commit_all_changes(message, push=False):
         repo = git.Repo(settings.REPO_DIR)
         repo.git.add(A=True)
-
-        repo.index.commit(message, no_verify=True)
+        repo.index.commit(message)
         if push:
             origin = repo.remote(name='origin')
             origin.push(repo.active_branch.name, set_upstream=True)

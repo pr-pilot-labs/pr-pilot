@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 class TaskEngine:
 
     def __init__(self, task: Task, max_steps=5):
+        os.environ["GIT_COMMIT_HOOK"] = ""
         self.task = task
         self.max_steps = max_steps
         self.executor = create_pr_pilot_agent()
