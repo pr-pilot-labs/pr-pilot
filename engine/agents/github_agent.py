@@ -2,6 +2,7 @@ import logging
 from typing import List
 
 from django.conf import settings
+from github import GithubException
 from github.PullRequest import PullRequest
 from langchain.agents import create_openai_functions_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder, \
@@ -110,6 +111,23 @@ def create_github_issue(issue_title: str, issue_body: str, labels: List[str] = [
     issue = repo.create_issue(title=issue_title, body=issue_body, labels=labels)
     TaskEvent.add(actor="assistant", action="create_github_issue", target=issue.title, message=f"Created issue [#{issue.number} {issue.title}]({issue.html_url})")
     return f"Created issue [#{issue.number} {issue.title}]({issue.html_url})"
+
+
+@tool
+def edit_github_issue(issue_number: int, new_title: str, new_body: str):
+    """Edit the title and body of a Github issue."""
+    g = Task.current().github
+    repo = g.get_repo(Task.current().github_project)
+    try:
+        issue = repo.get_issue(issue_number)
+    except GithubException as e:
+        if e.status == 404:
+            return f"Issue #{issue_number} not found in project {Task.current().github_project}"
+        else:
+            raise
+    issue.edit(title=new_title, body=new_body)
+    TaskEvent.add(actor="assistant", action="edit_github_issue", target=issue.title, message=f"Edited issue [#{issue_number} {issue.title}]({issue.html_url})")
+    return f"Edited issue [#{issue_number} {new_title}]({issue.html_url})"
 
 
 @tool

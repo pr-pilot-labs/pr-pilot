@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.analysis_agent import talk_to_analysis_agent_agent
 from engine.agents.common import AGENT_COMMUNICATION_RULES
-from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue
+from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
 from engine.agents.web_search_agent import talk_to_web_search_agent
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
@@ -225,7 +225,7 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
 
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues] + file_tools
+    tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue] + file_tools
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),

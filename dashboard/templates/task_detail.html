@@ -3,9 +3,6 @@
 {% block content %}
     <h1>{{task.title }}</h1>
     <p>
-        {% if task.status == 'running' %}
-            <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
-        {% endif %}
         {% if task.status == 'failed' %}
         <span class="badge bg-danger">{{ task.status }}</span>
         {% elif task.status == 'completed' %}

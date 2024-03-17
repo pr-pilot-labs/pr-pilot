@@ -97,6 +97,13 @@ class TaskEngine:
     def run(self) -> str:
         self.task.status = "running"
         self.task.save()
+        budget = UserBudget.get_user_budget(self.task.github_user)
+        if budget.budget < Decimal("0.00"):
+            TaskEvent.add(actor="assistant", action="budget_exceeded", target=self.task.github_user, message="Budget exceeded. Please add credits to your account.")
+            self.task.status = "failed"
+            self.task.result = "Budget exceeded. Please add credits to your account."
+            self.task.response_comment.edit(self.task.result)
+            return self.task.result
         self.generate_task_title()
         self.clone_github_repo()
         # If task is a PR, checkout the PR branch

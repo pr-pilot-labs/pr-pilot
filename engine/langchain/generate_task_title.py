@@ -41,4 +41,4 @@ chain = prompt | model | parser
 
 
 def generate_task_title(issue_description: str, user_request: str) -> str:
-    return chain.invoke({"issue_description": issue_description, "user_request": user_request})
+    return chain.invoke({"issue_description": issue_description, "user_request": user_request}).lstrip("\"").rstrip("\"")
