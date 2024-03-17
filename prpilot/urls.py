@@ -1,3 +1,4 @@
+### prpilot/urls.py
 """
 URL configuration for prpilot project.
 
@@ -34,4 +35,35 @@ urlpatterns = [
     path('dashboard/', include('dashboard.urls')),
     path('healthz/', health_check, name='health_check'),
     path('', home, name='home'),
+]
+
+
+### dashboard/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # Other URL patterns...
+    path('tasks/', views.TaskListView.as_view(), name='task_list'),
+    path('tasks/<uuid:pk>/', views.TaskDetailView.as_view(), name='task_detail'),
+]
+
+
+### accounts/urls.py
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    # Other URL patterns...
+    path('logout/', views.user_logout, name='user_logout'),
+]
+
+
+### webhooks/urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('github/', views.github_webhook, name='github_webhook'),
 ]
