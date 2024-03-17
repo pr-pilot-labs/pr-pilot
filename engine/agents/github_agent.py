@@ -89,7 +89,10 @@ def read_pull_request(pr_number: int):
     if not pr:
         return f"Pull request #{pr_number} not found"
 
-    # Prepare the markdown string
+    labels = ','.join([label.name for label in pr.labels])
+
+    markdown_output = f"# [{pr.number}] {pr.title}\n"
+    markdown_output += f"Labels: {labels}\n\n"
     markdown_output = f"## Pull Request Description\n{pr.body}\n\n## Comments\n"
     for comment in pr.get_comments():
         markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
@@ -114,8 +117,8 @@ def create_github_issue(issue_title: str, issue_body: str, labels: List[str] = [
 
 
 @tool
-def edit_github_issue(issue_number: int, new_title: str, new_body: str):
-    """Edit the title and body of a Github issue."""
+def edit_github_issue(issue_number: int, new_title: str, new_body: str, labels: List[str] = []):
+    """Edit the title, labels and body of a Github issue."""
     g = Task.current().github
     repo = g.get_repo(Task.current().github_project)
     try:
@@ -125,7 +128,7 @@ def edit_github_issue(issue_number: int, new_title: str, new_body: str):
             return f"Issue #{issue_number} not found in project {Task.current().github_project}"
         else:
             raise
-    issue.edit(title=new_title, body=new_body)
+    issue.edit(title=new_title, body=new_body, labels=labels)
     TaskEvent.add(actor="assistant", action="edit_github_issue", target=issue.title, message=f"Edited issue [#{issue_number} {issue.title}]({issue.html_url})")
     return f"Edited issue [#{issue_number} {new_title}]({issue.html_url})"
 
@@ -137,9 +140,12 @@ def read_github_issue(issue_number: int):
     g = Task.current().github
     repo = g.get_repo(Task.current().github_project)
     issue = repo.get_issue(issue_number)
+    labels = ','.join([label.name for label in issue.labels])
     TaskEvent.add(actor="assistant", action="read_github_issue", target=issue.title, message=f"Reading issue [#{issue_number}]({issue.html_url})")
     # Prepare the markdown string
-    markdown_output = f"## Issue Description\n{issue.body}\n\n## Comments\n"
+    markdown_output = f"# [{issue.number}] {issue.title}"
+    markdown_output += f"Labels: {labels}\n\n"
+    markdown_output += f"## Issue Description\n{issue.body}\n\n## Comments\n"
     for comment in issue.get_comments():
         markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
 
