@@ -41,12 +41,12 @@ The Github user `{commenter_username}` mentioned you in a comment:
 {issue_or_pr} number: {issue_number}
 User comment:
 ```
-{command}
+{comment_text}
 ```
 
 Read the {issue_or_pr}, fulfill the user's request and return your response to the user's comment.
 """
-        task_args = dict(title=f"Respond to {issue_or_pr} #{issue_number}", user_request=user_request,
+        task_args = dict(title=f"Respond to {issue_or_pr} #{issue_number} in {repository}", user_request=user_request,
                          issue_number=issue_number, comment_id=comment_id, comment_url=comment_url,
                          installation_id=installation_id, github_project=repository,
                          github_user=commenter_username, branch="main")

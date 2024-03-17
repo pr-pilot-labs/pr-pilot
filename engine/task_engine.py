@@ -155,7 +155,7 @@ class TaskEngine:
                 budget.save()
             else:
                 logger.warning(f"No cost items found for task {self.task.title}")
-        self.task.response_comment.edit(final_response)
+        self.task.response_comment.edit(final_response.strip().replace("/pilot", ""))
         return final_response
 
     def clone_github_repo(self):

@@ -55,7 +55,7 @@ def handle_pull_request_review_comment(payload):
     
     User Comment:
     ```
-    {command}
+    {comment_text}
     ```
 
     Read the pull request, fulfill the user's request and return the response to the user's comment.
