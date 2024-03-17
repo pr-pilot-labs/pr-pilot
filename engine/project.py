@@ -1,9 +1,11 @@
 import logging
+from pathlib import Path
 
 import git
 from django.conf import settings
 from pydantic import Field, BaseModel
 
+from engine.file_system import FileSystem
 from engine.models import Task, TaskEvent
 
 logger = logging.getLogger(__name__)
@@ -34,6 +36,13 @@ class Project(BaseModel):
         gh = task.github
         repo = gh.get_repo(task.github_project)
         return Project(name=repo.full_name, main_branch=repo.default_branch)
+
+
+    def load_pilot_hints(self):
+        """Load pilot hints from the repository"""
+        file_system = FileSystem()
+        node = file_system.get_node(Path(".pilot-hints.md"))
+        return node.content if node else ""
 
     def discard_all_changes(self):
         logger.info("Discarding all changes")

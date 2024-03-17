@@ -72,8 +72,10 @@ Examples:
 """ + AGENT_COMMUNICATION_RULES
 
 template = """
-# User Request
+# Hints for you to better understand the project
+{pilot_hints}
 
+# User Request
 {user_request}
 """
 
@@ -227,7 +229,7 @@ def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
     tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue] + file_tools
     prompt = ChatPromptTemplate.from_messages(
-        [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project'], template=system_message)),
+        [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project', 'project_info'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
          MessagesPlaceholder(variable_name='agent_scratchpad'),
          SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. If anything fails along the way, abort and provide a reason.')]

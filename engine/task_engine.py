@@ -117,7 +117,9 @@ class TaskEngine:
             # Make sure we never work directly on the main branch
             if self.project.active_branch == self.project.main_branch:
                 raise ValueError(f"Cannot work on the main branch {self.project.main_branch}.")
-            executor_result = self.executor.invoke({"user_request": self.task.user_request, "github_project": self.task.github_project})
+            executor_result = self.executor.invoke({"user_request": self.task.user_request,
+                                                    "github_project": self.task.github_project,
+                                                    "pilot_hints": self.project.load_pilot_hints()})
             self.task.result = executor_result['output']
             self.task.status = "completed"
             final_response = executor_result['output']
