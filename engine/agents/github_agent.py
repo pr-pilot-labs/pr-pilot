@@ -87,8 +87,10 @@ def read_pull_request(pr_number: int):
     pr = repo.get_pull(pr_number)
 
     if not pr:
+        TaskEvent.add(actor="assistant", action="read_pull_request", message=f"Pull request #{pr_number} not found")
         return f"Pull request #{pr_number} not found"
 
+    TaskEvent.add(actor="assistant", action="read_pull_request", target=pr.title, message=f"Reading pull request [{pr.title}]({pr.html_url})")
     labels = ','.join([label.name for label in pr.labels])
 
     markdown_output = f"# [{pr.number}] {pr.title}\n"
@@ -143,9 +145,9 @@ def read_github_issue(issue_number: int):
     labels = ','.join([label.name for label in issue.labels])
     TaskEvent.add(actor="assistant", action="read_github_issue", target=issue.title, message=f"Reading issue [#{issue_number}]({issue.html_url})")
     # Prepare the markdown string
-    markdown_output = f"# [{issue.number}] {issue.title}"
-    markdown_output += f"Labels: {labels}\n\n"
-    markdown_output += f"## Issue Description\n{issue.body}\n\n## Comments\n"
+    markdown_output = f"# Issue [{issue.number}] {issue.title}"
+    markdown_output += f"## Labels\n{labels}\n\n"
+    markdown_output += f"## Body\n{issue.body}\n\n## Comments\n"
     for comment in issue.get_comments():
         markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
 
