@@ -84,7 +84,7 @@ def read_pull_request(pr_number: int):
     # Initialize GitHub client
     g = Task.current().github
     repo = g.get_repo(Task.current().github_project)
-    pr = repo.get_pull(pr_number)
+    pr: PullRequest = repo.get_pull(pr_number)
 
     if not pr:
         TaskEvent.add(actor="assistant", action="read_pull_request", message=f"Pull request #{pr_number} not found")
@@ -95,8 +95,13 @@ def read_pull_request(pr_number: int):
 
     markdown_output = f"# [{pr.number}] {pr.title}\n"
     markdown_output += f"Labels: {labels}\n\n"
-    markdown_output = f"## Pull Request Description\n{pr.body}\n\n## Comments\n"
-    for comment in pr.get_comments():
+    markdown_output = f"## Pull Request Description\n{pr.body}\n\n## Review Comments\n"
+
+    for comment in pr.get_review_comments():
+        markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
+
+    markdown_output = f"## Issue Comments\n"
+    for comment in pr.get_issue_comments():
         markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
 
     markdown_output += "## Code Changes\n"
