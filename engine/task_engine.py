@@ -106,14 +106,16 @@ class TaskEngine:
             return self.task.result
         self.generate_task_title()
         self.clone_github_repo()
-        # If task is a PR, checkout the PR branch
-        if self.task.pr_number:
-            TaskEvent.add(actor="assistant", action="checkout_pr_branch", target=self.task.head, message="Checking out PR branch")
-            self.project.checkout_branch(self.task.head)
-            working_branch = self.task.head
-        else:
-            working_branch = self.setup_working_branch(self.task.title)
+
         try:
+            # If task is a PR, checkout the PR branch
+            if self.task.pr_number:
+                TaskEvent.add(actor="assistant", action="checkout_pr_branch", target=self.task.head,
+                              message="Checking out PR branch")
+                self.project.checkout_branch(self.task.head)
+                working_branch = self.task.head
+            else:
+                working_branch = self.setup_working_branch(self.task.title)
             # Make sure we never work directly on the main branch
             if self.project.active_branch == self.project.main_branch:
                 raise ValueError(f"Cannot work on the main branch {self.project.main_branch}.")
