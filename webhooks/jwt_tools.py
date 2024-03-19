@@ -22,7 +22,7 @@ def generate_jwt(app_id, private_key_path):
         # issued at time, 60 seconds in the past to allow for clock drift
         'iat': now - 60,
         # JWT expiration time (10 minute maximum)
-        'exp': now + (10 * 60),
+        'exp': now + (5 * 60),
         # GitHub App's identifier
         'iss': app_id
     }

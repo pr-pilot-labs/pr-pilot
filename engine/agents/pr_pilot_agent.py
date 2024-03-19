@@ -5,16 +5,13 @@ from pathlib import Path
 from typing import Optional
 
 from django.conf import settings
-from github.GithubObject import Opt, NotSet
 from langchain.agents import create_openai_functions_agent, AgentExecutor
-from langchain_community.agent_toolkits import FileManagementToolkit
 from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder, \
     HumanMessagePromptTemplate, PromptTemplate
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
-from engine.agents.analysis_agent import talk_to_analysis_agent_agent
 from engine.agents.common import AGENT_COMMUNICATION_RULES
 from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
 from engine.agents.web_search_agent import talk_to_web_search_agent
@@ -79,32 +76,39 @@ template = """
 {user_request}
 """
 
-file_tools = FileManagementToolkit(
-    root_dir=str(settings.REPO_DIR),
-    selected_tools=["move_file", "copy_file"]
-
-).get_tools()
-
 
 @tool
-def search_files(keyword: str):
-    """Search for files in the project."""
-    all_files = FileSystem().list_files()
-    found_files = [str(file).replace(str(settings.REPO_DIR), '').lstrip('/') for file in all_files if keyword in str(file.name)]
-    if len(found_files) > settings.MAX_FILE_SEARCH_RESULTS:
-        return f"Too many files ({len(found_files)}) found for keyword '{keyword}'. Please refine your search."
-    if found_files:
-        return "\n".join(found_files)
-    else:
-        return "No files found."
-
+def delete_file(path: str):
+    """Delete a file from the repository."""
+    fs = FileSystem()
+    if not fs.get_node(Path(path)):
+        return f"File not found: `{path}`"
+    TaskEvent.add(actor="Darwin", action="delete_file", target=path, message=f"Deleting file {path}")
+    FileSystem().delete_file(path)
+    Project.commit_all_changes(f"Deleted file {path}")
+    return f"File deleted: `{path}`"
 
 @tool
-def create_directory(path: str):
-    """Create a directory and all parent directories if they do not exist."""
-    TaskEvent.add(actor="Darwin", action="create_directory", target=path, message=f"Creating directory {path}")
-    FileSystem().create_directory(path)
-    return f"Directory {path} created."
+def copy_file(source: str, destination: str):
+    """Copy a file from one location to another."""
+    fs = FileSystem()
+    if not fs.get_node(Path(source)):
+        return f"File not found: `{source}`"
+    TaskEvent.add(actor="Darwin", action="copy_file", target=source, message=f"Copying file {source} to {destination}")
+    FileSystem().copy_file(source, destination)
+    Project.commit_all_changes(f"Copied file {source} to {destination}")
+    return f"File copied from {source} to {destination}."
+
+@tool
+def move_file(source: str, destination: str):
+    """Move a file from one location to another."""
+    fs = FileSystem()
+    if not fs.get_node(Path(source)):
+        return f"File not found: `{source}`"
+    TaskEvent.add(actor="Darwin", action="move_file", target=source, message=f"Moving file {source} to {destination}")
+    FileSystem().move_file(source, destination)
+    Project.commit_all_changes(f"Moved file {source} to {destination}")
+    return f"File moved from {source} to {destination}."
 
 @tool
 def write_file(path: str, complete_entire_file_content: str, commit_message: str):
@@ -226,8 +230,8 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
 
 
 def create_pr_pilot_agent():
-    llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "Tool Execution")])
-    tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue] + file_tools
+    llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "conversation")])
+    tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue, copy_file, move_file, delete_file]
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project', 'project_info'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),

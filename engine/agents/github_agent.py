@@ -95,18 +95,33 @@ def read_pull_request(pr_number: int):
 
     markdown_output = f"# [{pr.number}] {pr.title}\n"
     markdown_output += f"Labels: {labels}\n\n"
-    markdown_output = f"## Pull Request Description\n{pr.body}\n\n## Review Comments\n"
-
-    for comment in pr.get_review_comments():
-        markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
-
-    markdown_output = f"## Issue Comments\n"
-    for comment in pr.get_issue_comments():
-        markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
+    markdown_output += f"## PR Body\n{pr.body}\n\n"
 
     markdown_output += "## Code Changes\n"
     for file in pr.get_files():
         markdown_output += f"**{file.filename}**\n```diff\n{file.patch}\n```\n\n"
+
+    markdown_output += f"## Review Comments\n"
+    # Collect all review comments and properly format them together with the relevant diff_hunk based on in_reply_to_id
+    review_comments = list(pr.get_review_comments())
+    review_comments.sort(key=lambda x: x.created_at)
+    for comment in review_comments:
+        if comment.in_reply_to_id:
+            # Find the comment that this comment is replying to
+            parent_comment = next((c for c in review_comments if c.id == comment.in_reply_to_id), None)
+            if parent_comment:
+                markdown_output += f"**@{comment.user.login} replied to @{parent_comment.user.login}**\n{comment.body}\n\n"
+        else:
+            markdown_output += f"**@{comment.user.login} commented on diff:**\n```diff\n{comment.diff_hunk}\n```\n{comment.body}\n\n"
+
+    markdown_output += f"## Issue Comments\n"
+    for comment in pr.get_issue_comments():
+        markdown_output += f"**@{comment.user.login} wrote:**\n{comment.body}\n\n"
+
+    markdown_output += f"## PR Commits\n"
+    for commit in pr.get_commits():
+        markdown_output += f"**{commit.commit.author.name}**\n{commit.commit.message}\n\n"
+
 
     return markdown_output
 

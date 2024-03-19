@@ -154,6 +154,25 @@ class FileSystem:
         absolute_path.mkdir(parents=True, exist_ok=True)
         logger.info(f"Directory created: {absolute_path}")
 
+    def move_file(self, source, destination):
+        source = self.root_directory / source
+        destination = self.root_directory / destination
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        source.replace(destination)
+        logger.info(f"File moved from {source} to {destination}")
+
+    def copy_file(self, source, destination):
+        source = self.root_directory / source
+        destination = self.root_directory / destination
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(source.read_text())
+        logger.info(f"File copied from {source} to {destination}")
+
+    def delete_file(self, path):
+        path = self.root_directory / path
+        path.unlink()
+        logger.info(f"File deleted: {path}")
+
 
 if __name__ == '__main__':
     file_system = FileSystem()
