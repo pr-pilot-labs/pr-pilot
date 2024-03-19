@@ -2,10 +2,12 @@ import logging
 import shlex
 import subprocess
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union, List, Dict
 
 from django.conf import settings
 from langchain.agents import create_openai_functions_agent, AgentExecutor
+from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_core.callbacks import CallbackManagerForToolRun
 from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, MessagesPlaceholder, \
     HumanMessagePromptTemplate, PromptTemplate
@@ -14,7 +16,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.common import AGENT_COMMUNICATION_RULES
 from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
-from engine.agents.web_search_agent import talk_to_web_search_agent
+from engine.agents.web_search_agent import talk_to_web_search_agent, scrape_website
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
 from engine.models import TaskEvent, Task
@@ -34,37 +36,6 @@ All issues, PR, files and code you have access to are in the context of the `{gi
 # How to handle files
 - Reading files is EXPENSIVE. Only read the files you really need to solve the task
 - When writing files, ALWAYS write the entire file content, do not leave anything out.
-
-# Searching the code base
-You can search the code base using the `search_github_code` function. It uses the Github search syntax.
-Use this function to find out more about classes/functions/files/etc mentioned in the user request.
-
-## Example 1: Search for `initMap` function in JavaScript files
-`symbol:initMap language:javascript`
-
-## Example 2: Find all `WithContext` functions in Go files
-`language:go symbol:WithContext`
-
-## Example 3: Locate `TODO` comments in Python files
-`TODO language:python`
-
-## Example 4: Search for `NullPointerException` in Java files
-`NullPointerException language:java`
-
-## Example 5: Find all JavaScript files in the `src` directory and its subdirectories
-`path:/src/**/*.js`
-
-## Example 6: FInd all files with the `.txt` extension
-`path:*.txt`
-
-
-# How to talk to WebSearchAgent
-You can talk to the WebSearchAgent using the `talk_to_web_search_agent` function. Make sure to ask detailed, specific
-questions to get the best results. Use full sentences and give enough context.
-
-Examples:
-- "Visit URL <url> and tell me <what you want to know>"
-- "Search for <search query>, visit the top 3 results and answer my question: <what you want to know>"
 
 """ + AGENT_COMMUNICATION_RULES
 
@@ -229,9 +200,16 @@ def search_github_issues(query: str, sort: Optional[str], order: Optional[str]):
     return response
 
 
+class PRPilotSearch(TavilySearchResults):
+
+    def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[Dict], str]:
+        TaskEvent.add(actor="assistant", action="search", message=query)
+        return super()._run(query, run_manager)
+
+
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "conversation")])
-    tools = [read_github_issue, read_pull_request, create_github_issue, talk_to_web_search_agent, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue, copy_file, move_file, delete_file]
+    tools = [read_github_issue, read_pull_request, create_github_issue, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue, copy_file, move_file, delete_file, PRPilotSearch(), scrape_website]
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project', 'project_info'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
