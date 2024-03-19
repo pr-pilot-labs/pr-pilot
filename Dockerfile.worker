@@ -20,5 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
+RUN git config --global user.name "PR Pilot"
+RUN git config --global user.email "bot@pr-pilot.ai"
+
 # Run uwsgi
 CMD python manage.py run_task $TASK_ID
