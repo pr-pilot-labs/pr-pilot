@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.common import AGENT_COMMUNICATION_RULES
 from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
-from engine.agents.web_search_agent import talk_to_web_search_agent, scrape_website
+from engine.agents.web_search_agent import scrape_website
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
 from engine.models import TaskEvent, Task
@@ -32,6 +32,12 @@ You are PR Pilot, an AI collaborator on the `{github_project}` Github Project.
 You will receive a user request related to an issue or PR on the project.
 Your job is to fulfill the user request autonomously and provide the response.
 All issues, PR, files and code you have access to are in the context of the `{github_project}` repository.
+
+# How to handle user requests
+- If the user mentions classes, methods, etc in the code, you can find them using the `search_with_ripgrep` function
+- If necessary, search the internet to make sure your answers are accurate
+- Keep your answers short and to the point, unless the user asks for a detailed explanation
+- If your answer is based on internet research, make sure to mention the source  
 
 # How to handle files
 - Reading files is EXPENSIVE. Only read the files you really need to solve the task
