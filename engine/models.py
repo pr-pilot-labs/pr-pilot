@@ -78,7 +78,13 @@ class Task(models.Model):
     @property
     def request_comment(self):
         if self.pr_number:
-            return self.request_issue.get_review_comment(self.comment_id)
+            try:
+                return self.request_issue.get_review_comment(self.comment_id)
+            except GithubException as e:
+                if e.status == 404:
+                    return self.request_issue.get_issue_comment(self.response_comment_id)
+                else:
+                    raise
         else:
             return self.request_issue.get_comment(self.comment_id)
 
