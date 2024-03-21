@@ -11,6 +11,7 @@ from github import Github, GithubException
 from github.PullRequest import PullRequest
 
 from accounts.models import UserBudget
+from engine.agents.memory_agent import talk_to_memory_agent_agent
 from engine.agents.pr_pilot_agent import create_pr_pilot_agent
 from engine.langchain.generate_pr_info import generate_pr_info, LabelsAndTitle
 from engine.langchain.generate_task_title import generate_task_title
@@ -121,6 +122,7 @@ class TaskEngine:
                 raise ValueError(f"Cannot work on the main branch {self.project.main_branch}.")
             executor_result = self.executor.invoke({"user_request": self.task.user_request,
                                                     "github_project": self.task.github_project,
+                                                    "memories": self.retrieve_memories(),
                                                     "pilot_hints": self.project.load_pilot_hints()})
             self.task.result = executor_result['output']
             self.task.status = "completed"
@@ -162,6 +164,7 @@ class TaskEngine:
         comment.edit(final_response.strip().replace("/pilot", ""))
         TaskEvent.add(actor="assistant", action="comment_on_issue", target=comment.id,
                       message=f"Commented on [Issue {self.task.issue_number}]({comment.html_url})")
+        self.create_memories()
         return final_response
 
     def clone_github_repo(self):
@@ -174,3 +177,16 @@ class TaskEngine:
         git.Repo.clone_from(git_repo_url, settings.REPO_DIR)
         logger.info(f"Cloned repo {self.task.github_project} to {settings.REPO_DIR}")
 
+    def retrieve_memories(self):
+        prompt = f"# User Query \n{self.task.user_request}\n\n"
+        prompt += f"# Body of issue/PR related to query\n{self.task.request_issue.body}\n\n"
+        prompt += (f"# Your job\nRetrieve memories that are relevant to this task. Filter out irrelevant information and only return what is relevant."
+                   f"If there are no relevant memories, just say 'No memories found'.\n\n")
+        # TODO Maybe include issue and PR comments in the prompt
+        memories = talk_to_memory_agent_agent(prompt)
+        TaskEvent.add(actor="assistant", action="retrieve_memories", message=memories)
+
+    def create_memories(self):
+        memories = talk_to_memory_agent_agent(f"If necessary, create new memories for this task. If no new memories need to be created, just say 'no new memories created'"
+                                              f"\n\n{self.task.to_markdown()}")
+        TaskEvent.add(actor="assistant", action="create_memories", message=memories)

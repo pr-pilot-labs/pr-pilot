@@ -39,6 +39,17 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    def to_markdown(self):
+        markdown = f"# Task: {self.title}\n"
+        markdown += f"**Status:** {self.status}\n"
+        markdown += f"**Github User:** {self.github_user}\n"
+        markdown += f"## User Request\n{self.user_request}\n"
+        markdown += "## Events\n"
+        for event in self.events.all():
+            markdown += f"**{event.action}** `{event.target}`\n{event.message}\n\n"
+        markdown += f"## PR Pilot Response\n{self.result}\n"
+        return markdown
+
     @staticmethod
     @lru_cache()
     def current():
@@ -53,6 +64,14 @@ class Task(models.Model):
     @property
     def reversible_events(self):
         return [event for event in self.events.filter(reversed=False) if event.reversible]
+
+    @property
+    def request_issue(self):
+        repo = self.github.get_repo(self.github_project)
+        if self.pr_number:
+            return repo.get_pull(self.pr_number)
+        else:
+            return repo.get_issue(self.issue_number)
 
     @property
     def response_comment(self):

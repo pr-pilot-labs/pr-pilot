@@ -47,11 +47,13 @@ All issues, PR, files and code you have access to are in the context of the `{gi
 - When creating a new issue, include a link back to the original issue or PR in the body
 - New issue titles should be descriptive, concise and have an emoji at the beginning
 
+# Memories
+You will also receive relevant memories that you can use to help you fulfill the user request.
 """
 
 template = """
-# Hints for you to better understand the project
-{pilot_hints}
+# Relevant memories
+{memories}
 
 # User Request
 {user_request}
@@ -223,7 +225,7 @@ def create_pr_pilot_agent():
     tools = [read_github_issue, read_pull_request, create_github_issue, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue, copy_file, move_file, delete_file, PRPilotSearch(), scrape_website]
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project', 'project_info'], template=system_message)),
-         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request'], template=template)),
+         HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request', 'memories'], template=template)),
          MessagesPlaceholder(variable_name='agent_scratchpad'),
          SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. If anything fails along the way, abort and provide a reason.')]
     )
