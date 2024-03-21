@@ -139,7 +139,9 @@ class TaskEngine:
                 pr: PullRequest = Project.from_github().create_pull_request(title=pr_info.title, body=final_response,
                                                                head=working_branch, labels=pr_info.labels)
                 final_response += f"\n\n**PR**: [{pr.title}]({pr.html_url})\n\nIf you require further changes, continue our conversation over there!"
-            final_response += f"\n\n📋[Task Log](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)"
+            final_response += f"\n\n---\n📋 **[Log](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/)**"
+            if len(self.task.reversible_events) > 0:
+                final_response += f" ↩️ **[Undo](https://app.pr-pilot.ai/dashboard/tasks/{str(self.task.id)}/undo/)**"
         except Exception as e:
             self.task.status = "failed"
             self.task.result = str(e)
@@ -157,7 +159,10 @@ class TaskEngine:
                 budget.save()
             else:
                 logger.warning(f"No cost items found for task {self.task.title}")
-        self.task.response_comment.edit(final_response.strip().replace("/pilot", ""))
+        comment = self.task.response_comment
+        comment.edit(final_response.strip().replace("/pilot", ""))
+        TaskEvent.add(actor="assistant", action="comment_on_issue", target=comment.id,
+                      message=f"Commented on [Issue {self.task.issue_number}]({comment.html_url})")
         return final_response
 
     def clone_github_repo(self):

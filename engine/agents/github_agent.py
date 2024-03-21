@@ -134,7 +134,7 @@ def create_github_issue(issue_title: str, issue_body: str, labels: List[str] = [
         labels.append('pr-pilot')
     repo = g.get_repo(Task.current().github_project)
     issue = repo.create_issue(title=issue_title, body=issue_body, labels=labels)
-    TaskEvent.add(actor="assistant", action="create_github_issue", target=issue.title, message=f"Created issue [#{issue.number} {issue.title}]({issue.html_url})")
+    TaskEvent.add(actor="assistant", action="create_github_issue", target=issue.number, message=f"Created issue [#{issue.number} {issue.title}]({issue.html_url})")
     return f"Created issue [#{issue.number} {issue.title}]({issue.html_url})"
 
 
@@ -151,7 +151,7 @@ def edit_github_issue(issue_number: int, new_title: str, new_body: str, labels: 
         else:
             raise
     issue.edit(title=new_title, body=new_body, labels=labels)
-    TaskEvent.add(actor="assistant", action="edit_github_issue", target=issue.title, message=f"Edited issue [#{issue_number} {issue.title}]({issue.html_url})")
+    TaskEvent.add(actor="assistant", action="edit_github_issue", target=issue.number, message=f"Edited issue [#{issue_number} {issue.title}]({issue.html_url})")
     return f"Edited issue [#{issue_number} {new_title}]({issue.html_url})"
 
 
@@ -163,7 +163,7 @@ def read_github_issue(issue_number: int):
     repo = g.get_repo(Task.current().github_project)
     issue = repo.get_issue(issue_number)
     labels = ','.join([label.name for label in issue.labels])
-    TaskEvent.add(actor="assistant", action="read_github_issue", target=issue.title, message=f"Reading issue [#{issue_number}]({issue.html_url})")
+    TaskEvent.add(actor="assistant", action="read_github_issue", target=issue.number, message=f"Reading issue [#{issue_number}]({issue.html_url})")
     # Prepare the markdown string
     markdown_output = f"# Issue [{issue.number}] {issue.title}"
     markdown_output += f"## Labels\n{labels}\n\n"

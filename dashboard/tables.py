@@ -54,25 +54,67 @@ class TaskTable(tables.Table):
 class EventTable(tables.Table):
     message = MarkdownColumn()
 
-    def render_action(self, value):
-        return format_html('<span class="badge bg-primary">{}</span>', value.replace('_', ' '))
+    def render_target(self, record):
+        github_issue_targets = ['create_github_issue', 'close_github_issue', 'read_github_issue', 'edit_github_issue', 'close_pull_request', 'read_pull_request', 'create_pull_request']
+        if record.action in github_issue_targets:
+            issue_url = f"https://github.com/{record.task.github_project}/issues/{record.target}"
+            return format_html('<a href="{}" target="_blank">#{}</a>', issue_url, record.target)
+        elif record.action == 'clone_repo':
+            repo_url = f"https://github.com/{record.task.github_project}"
+            return format_html('<a href="{}" target="_blank">{}</a>', repo_url, record.target)
+        elif record.action == 'commit_changes':
+            commit_url = f"https://github.com/{record.task.github_project}/commit/{record.target}"
+            return format_html('<a href="{}" target="_blank">{}</a>', commit_url, record.target)
+        elif record.action in ['push_branch', 'checkout_pr_branch']:
+            branch_url = f"https://github.com/{record.task.github_project}/tree/{record.target}"
+            return format_html('<a href="{}" target="_blank">{}</a>', branch_url, record.target)
+        elif record.action == 'comment_on_issue':
+            issue_id = record.task.pr_number if record.task.pr_number else record.task.issue_number
+            return format_html('<a href="{}" target="_blank">#{}</a>', record.task.response_comment_url, issue_id)
+        else:
+            return record.target
+
+    def render_action(self, record):
+        color = 'primary' if not record.reversed else 'danger'
+        if record.action in ['close_pull_request', 'close_github_issue', 'delete_github_comment']:
+            color = 'warning'
+        return format_html('<span class="badge bg-{}">{}</span>', color, record.action.replace('_', ' '))
 
     class Meta:
         model = TaskEvent  # Use the model associated with the events
         template_name = "django_tables2/bootstrap5.html"
         attrs = {"class": "table table-striped table-hover"}
-        fields = ['timestamp', 'action', 'target', 'message']
+        fields = ['action', 'target', 'message']
+
+
+class EventUndoTable(EventTable):
+    message = MarkdownColumn()
+
+    def render_reversible(self, record):
+        """Render a checkbox column for reversible actions."""
+        if record.reversible and not record.reversed:
+            return format_html('<input type="checkbox" name="reversible" value="{}" checked>', record.id)
+        else:
+            return format_html('<input type="checkbox" name="reversible" value="{}" disabled>', record.id)
+
+
+    class Meta(EventTable.Meta):
+        fields = ['reversible', 'action', 'target', 'message']
+
 
 class CostItemTable(tables.Table):
+
+    def render_title(self, value):
+        return format_html('<span class="lead">{}</span>', value.replace('_', ' '))
 
     def render_model_name(self, value):
         return format_html('<span class="badge bg-secondary">{}</span>', value)
 
     def render_credits(self, value):
         usd_string = '{:.1f}'.format(value)
-        return usd_string
+        return format_html('<span class="badge rounded-pill bg-dark"><i class="fa-solid fa-coins"></i> {}</span>', usd_string)
 
     class Meta:
         model = CostItem
         template_name = "django_tables2/bootstrap5.html"
-        fields = ['title', 'model_name', 'credits']
+        fields = ['credits', 'title', 'model_name']
