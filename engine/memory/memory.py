@@ -1,9 +1,8 @@
 import logging
-import time
-import uuid
 from enum import Enum
 from typing import List
 
+from django.conf import settings
 from pydantic.v1 import BaseModel, Field
 from pymilvus import connections, Collection, FieldSchema, DataType, CollectionSchema
 from pymilvus.orm import utility
@@ -63,7 +62,7 @@ class MemoryCategory(Enum):
 
 class Memory(BaseModel):
     """A memory"""
-    category: MemoryCategory = Field(description="Category of the memory")
+    category: str = Field(description="Category of the memory (one-word, lowercase, alphanumeric)")
     text: str = Field(description="Text of the memory")
 
 
@@ -115,29 +114,9 @@ def search_memories(text, task: Task, top_k=3) -> List[MemorySearchResult]:
     # Process and log results
     search_results = []
     for hits in results:
-        for hit in hits:
-            memory = Memory(category=MemoryCategory(hit.entity.get("category")), text=hit.entity.get("text"))
+        for hit in [hit for hit in hits if hit.score > settings.MEMORY_SEARCH_THRESHOLD]:
+            memory = Memory(category=hit.entity.get("category"), text=hit.entity.get("text"))
             search_results.append(MemorySearchResult(score=hit.score, memory=memory))
             logger.info(f"ID: {hit.id}, Score: {hit.score}, Metadata: {hit.entity}")
     return search_results
 
-if __name__ == '__main__':
-    text = "I need to install a Python package."
-    category = "installation"
-    task_id = 123  # Ensure this is unique for each insert
-    memories = [
-        ["Uses `Django` as webframework", "framework", str(uuid.uuid4())],
-        ["Uses `langchain` for LLM interactions", "library", str(uuid.uuid4())],
-        ["Uses `pymilvus` for vector storage", "library", str(uuid.uuid4())],
-        ["Uses pytest for testing", "tools", str(uuid.uuid4())],
-
-    ]
-    try:
-        for memory in memories:
-            insert_memory(*memory)
-        # time.sleep(2)  # Ensure the insert is complete before searching
-        time.sleep(5)
-        search_memories('How do I interact with LLMs')
-    finally:
-        collection.drop()
-        pass

@@ -5,4 +5,5 @@ from . import views
 urlpatterns = [
     # Other URL patterns...
     path('logout/', views.user_logout, name='user_logout'),
+    path('settings/', views.TaskUndoView.as_view(), name='user_settings'),
 ]

@@ -78,19 +78,7 @@ def list_open_pull_requests():
     return "\n".join([render_github_issue(pr) for pr in open_prs])
 
 
-@tool
-def read_pull_request(pr_number: int):
-    """Read the pull request and return description + comments + code changes as markdown"""
-    # Initialize GitHub client
-    g = Task.current().github
-    repo = g.get_repo(Task.current().github_project)
-    pr: PullRequest = repo.get_pull(pr_number)
-
-    if not pr:
-        TaskEvent.add(actor="assistant", action="read_pull_request", message=f"Pull request #{pr_number} not found")
-        return f"Pull request #{pr_number} not found"
-
-    TaskEvent.add(actor="assistant", action="read_pull_request", target=pr.title, message=f"Reading pull request [{pr.title}]({pr.html_url})")
+def format_pr(pr: PullRequest):
     labels = ','.join([label.name for label in pr.labels])
 
     markdown_output = f"# [{pr.number}] {pr.title}\n"
@@ -122,8 +110,22 @@ def read_pull_request(pr_number: int):
     for commit in pr.get_commits():
         markdown_output += f"**{commit.commit.author.name}**\n{commit.commit.message}\n\n"
 
-
     return markdown_output
+
+@tool
+def read_pull_request(pr_number: int):
+    """Read the pull request and return description + comments + code changes as markdown"""
+    # Initialize GitHub client
+    g = Task.current().github
+    repo = g.get_repo(Task.current().github_project)
+    pr: PullRequest = repo.get_pull(pr_number)
+
+    if not pr:
+        TaskEvent.add(actor="assistant", action="read_pull_request", message=f"Pull request #{pr_number} not found")
+        return f"Pull request #{pr_number} not found"
+
+    TaskEvent.add(actor="assistant", action="read_pull_request", target=pr.title, message=f"Reading pull request [{pr.title}]({pr.html_url})")
+    return format_pr(pr)
 
 
 @tool
@@ -162,15 +164,18 @@ def read_github_issue(issue_number: int):
     g = Task.current().github
     repo = g.get_repo(Task.current().github_project)
     issue = repo.get_issue(issue_number)
-    labels = ','.join([label.name for label in issue.labels])
     TaskEvent.add(actor="assistant", action="read_github_issue", target=issue.number, message=f"Reading issue [#{issue_number}]({issue.html_url})")
+    return format_github_issue(issue)
+
+
+def format_github_issue(issue):
     # Prepare the markdown string
+    labels = ','.join([label.name for label in issue.labels])
     markdown_output = f"# Issue [{issue.number}] {issue.title}"
     markdown_output += f"## Labels\n{labels}\n\n"
     markdown_output += f"## Body\n{issue.body}\n\n## Comments\n"
     for comment in issue.get_comments():
         markdown_output += f"**{comment.user.login} wrote:**\n{comment.body}\n\n"
-
     return markdown_output
 
 

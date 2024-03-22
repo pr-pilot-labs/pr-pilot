@@ -22,3 +22,11 @@ class UserBudget(models.Model):
             return UserBudget.objects.get(username=username)
         except UserBudget.DoesNotExist:
             return UserBudget.objects.create(username=username)
+
+
+class UserSettings(models.Model):
+    username = models.CharField(max_length=200)
+    memory_enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Settings for @{self.username}"

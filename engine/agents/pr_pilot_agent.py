@@ -16,6 +16,7 @@ from langchain_openai import ChatOpenAI
 
 from engine.agents.common import AGENT_COMMUNICATION_RULES
 from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
+from engine.agents.memory_agent import memorize
 from engine.agents.web_search_agent import scrape_website
 from engine.file_system import FileSystem
 from engine.langchain.cost_tracking import CostTrackerCallback
@@ -47,8 +48,16 @@ All issues, PR, files and code you have access to are in the context of the `{gi
 - When creating a new issue, include a link back to the original issue or PR in the body
 - New issue titles should be descriptive, concise and have an emoji at the beginning
 
-# Memories
+# How to handle Memories
 You will also receive relevant memories that you can use to help you fulfill the user request.
+Use your `memorize` function to memorize information. Do this at the end of EVERY task!
+The goal is for you to "understand" the project better over time, just like a developer on the project.
+
+## Guidelines for memorizing information
+- Do not mention Github project names in the memories
+- Do NOT memorize information that is common knowledge (e.g., Python is a programming language), only information specific to the project
+- Format: Impersonal, factual, concise and distinct
+- Each memory should not be more than one sentence. Prefer many, short memories over a few long ones
 """
 
 template = """
@@ -222,12 +231,15 @@ class PRPilotSearch(TavilySearchResults):
 
 def create_pr_pilot_agent():
     llm = ChatOpenAI(model="gpt-4-turbo-preview", temperature=0, callbacks=[CostTrackerCallback("gpt-4-turbo-preview", "conversation")])
-    tools = [read_github_issue, read_pull_request, create_github_issue, write_file, read_files, search_with_ripgrep, search_github_issues, edit_github_issue, copy_file, move_file, delete_file, PRPilotSearch(), scrape_website]
+    tools = [read_github_issue, read_pull_request, create_github_issue, write_file, read_files, search_with_ripgrep,
+             search_github_issues, edit_github_issue, copy_file, move_file, delete_file, PRPilotSearch(), scrape_website, memorize]
     prompt = ChatPromptTemplate.from_messages(
         [SystemMessagePromptTemplate(prompt=PromptTemplate(input_variables=['github_project', 'project_info'], template=system_message)),
          HumanMessagePromptTemplate(prompt=PromptTemplate(input_variables=['user_request', 'memories'], template=template)),
          MessagesPlaceholder(variable_name='agent_scratchpad'),
-         SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. If anything fails along the way, abort and provide a reason.')]
+         SystemMessage('Fulfill the user request autonomously and provide the response, without asking for further input. '
+                       'If anything fails along the way, abort and provide a reason.'
+                       'At the end, use the `memorize` function if you learned something new about the project.')]
     )
     agent = create_openai_functions_agent(llm, tools, prompt)
     return AgentExecutor(agent=agent, tools=tools, verbose=settings.DEBUG)
