@@ -62,6 +62,9 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         # Get the task from the context
         task = context['task']
         bill = TaskBill.objects.filter(task=task).first()
+        discount_credits = 0
+        if bill:
+            discount_credits = bill.total_credits_used * (1/(100-bill.discount_percent)) if bill.discount_percent > 0 else 0
         # Create an EventTable instance with the task's events
         budget = UserBudget.get_user_budget(self.request.user.username)
         context['budget'] = budget.formatted
@@ -69,7 +72,7 @@ class TaskDetailView(LoginRequiredMixin, DetailView):
         context['cost_item_table'] = CostItemTable(task.cost_items.all())
         context['task_result'] = mark_safe(markdown.markdown(task.result))
         context['total_cost'] = sum([item.credits for item in task.cost_items.all()])
-        context['discount_credits'] = bill.total_credits_used * (1/(100-bill.discount_percent)) if bill.discount_percent > 0 else 0
+        context['discount_credits'] = discount_credits
         context['bill'] = bill
         context['can_undo'] = len([event for event in task.events.all() if event.reversible and not event.reversed]) > 0
         return context
