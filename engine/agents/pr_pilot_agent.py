@@ -14,7 +14,6 @@ from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTempla
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
-from engine.agents.common import AGENT_COMMUNICATION_RULES
 from engine.agents.github_agent import read_github_issue, read_pull_request, create_github_issue, edit_github_issue
 from engine.agents.web_search_agent import scrape_website
 from engine.file_system import FileSystem

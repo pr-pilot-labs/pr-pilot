@@ -34,7 +34,7 @@ class FileSystem:
         if not hasattr(self, '_ignore_list'):
             # Create file if it doesn't exist
             if not os.path.exists(settings.IGNORE_FILE_PATH):
-                default_ignore_content = Path(os.path.join(os.path.dirname(__file__), "default_darwin_ignore.txt")).read_text()
+                default_ignore_content = Path(os.path.join(os.path.dirname(__file__), "default_ignore.txt")).read_text()
                 with open(settings.IGNORE_FILE_PATH, 'w') as f:
                     f.write(default_ignore_content)
             with open(settings.IGNORE_FILE_PATH, 'r') as f:

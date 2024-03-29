@@ -8,10 +8,6 @@ REGISTRY_URL := us-west2-docker.pkg.dev/darwin-407004/pr-pilot
 # Phony Targets
 .PHONY: logs build-static build-docker docker-push deploy create-k8s-secrets
 
-grafana:
-	export POD_NAME=$(kubectl get pods --namespace monitoring -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=grafana" -o jsonpath="{.items[0].metadata.name}")
-	kubectl --namespace monitoring port-forward $POD_NAME 3000
-
 # Logs
 logs:
 	stern -l app=pr-pilot | grep -v "/health"

@@ -11,5 +11,7 @@ log
 artifacts
 credentials.json
 env
-brain.json
 db.sqlite3
+*.png
+*.jpeg
+*.jpg
