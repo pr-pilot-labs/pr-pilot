@@ -4,3 +4,20 @@ image:
   repository: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-app
   nginx: us-west2-docker.pkg.dev/darwin-407004/pr-pilot/pr-pilot-static
   tag: 1.0.1
+
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 6.2.6
+    pullPolicy: IfNotPresent
+  usePassword: false
+  cluster:
+    enabled: false
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
