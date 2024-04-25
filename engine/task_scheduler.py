@@ -62,6 +62,8 @@ class TaskScheduler:
             self.task.save()
             return
 
+        # TODO: Modify to enqueue tasks into a Redis queue
+
         if settings.JOB_STRATEGY == 'thread':
             # In local development, just run the task in a background thread
             settings.TASK_ID = self.task.id
