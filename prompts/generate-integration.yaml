@@ -1,0 +1,42 @@
+name: Generate PR Pilot Integration for Sentry
+prompt: |
+  We want to build a new PR Pilot Integration for Sentry. A PR Pilot integration allows users to extend PR Pilot's capabilities by 
+  connecting it to external services. They add an integration via the dashboard UI, where they either enter 
+  the credentials manually or connect to the service via OAuth. Each integration defines Langchain agent tools 
+  that are used to interact with the service.
+  
+  An integration has the following components:
+  - A bootstrap UI in `dashboard/templates/integrations.html`
+  - A Django DRF view in `dashboard/views/integrations.py`
+  - An optional URL config in `dashboard/urls.py`
+  - A Django DB model in `accounts/models.py`
+  - Langchain agent tools in `engine/agents/integration_tools/<integration_name>_tools.py`
+  
+  The integration we want to implement should allow users to connect their Sentry account to PR Pilot,
+  so that the agent can search for issues in Sentry.
+
+steps:
+  - name: Add DB model for Sentry credentials
+    prompt: |
+      The user needs to store their API key.
+      1. Read `accounts/models.py`
+      2. Add a new model for the credentials and connect it to the user model, similar to the existing models.
+      3. Write the changes back to file
+  - name: Implement bootstrap UI
+    prompt: |
+      The UI should allow users to enter their Sentry API key.
+      1. Read `dashboard/templates/integrations.html` 
+      2. Add a new section for the integration so that users can enter their API key in a form.
+      3. Write the changes back to file
+  - name: Implement Django DRF view
+    prompt: |
+      1. Read `dashboard/views/integrations.py`
+      2. Make the necessary changes based on the integration's requirements.
+      3. Write the changes back to file
+      4. If you added a view, make sure to add it to the `urls.py` file.
+  - name: Implement Langchain agent tools
+    prompt: |
+      1. Read `engine/agents/integration_tools/slack_tools.py` as an example.
+      2. Write the new agent tools in `engine/agents/integration_tools/<integration_name>_tools.py`.
+      3. Integrate the new agent tools in `engine/agents/integration_tools/__init__.py`.
+      4. Write the unit tests for the new agent tools in `engine/agents/tests/test_<integration_name>_tools.py`.
