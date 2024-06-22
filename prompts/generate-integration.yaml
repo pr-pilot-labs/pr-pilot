@@ -9,10 +9,11 @@ prompt: |
     - A view controller in `dashboard/views/integrations.py`
   - A Django model in `accounts/models.py` to store credentials
   - A set of langchain agent tools in `agents/integration_tools/`
-
 steps:
   - name: Create Django model
-    prompt: Add the Django model for storing the Sentry API key
+    prompt: |
+      1. Add the Django model for storing the Sentry API key
+      2. Add a migration for the new model to `accounts/migrations/`
   - name: Update dashboard template
     prompt: The template currently contains dummy text. Replace it with a form to enter the API key.
   - name: Update view controller
@@ -22,4 +23,4 @@ steps:
       1. Read `engine/agents/integration_tools/slack_tools.py` to understand how agent tools work
       2. Implement Sentry agent tools in `engine/agents/integration_tools/sentry_tools.py`
       3. Write unit tests for the new tools in `engine/agents/tests/test_sentry_tools.py`
-      4. Register the tools in `engine/agents/integration_tools/__init__.py`
+      4. Understand the tool registration mechanism in `engine/agents/integration_tools/__init__.py` and add the new tools
