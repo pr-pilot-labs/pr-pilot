@@ -21,8 +21,8 @@ Then, install the CLI:
    brew tap pr-pilot-ai/homebrew-tap
    brew install pr-pilot-cli
 
-Get your API Key from the `dashboard <https://app.pr-pilot.ai/dashboard/api-keys/>`_ and you're ready to go!
-
+Using the CLI for the first time will ask you to authenticate with Github.
+After that, you're ready to go:
 
 .. code-block:: bash
 
