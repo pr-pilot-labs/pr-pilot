@@ -148,7 +148,7 @@ pilot history last <n> prompt --markdown | pbcopy
 PR Pilot aims to streamline your workflow by reducing friction and saving you time.
 
 #### Custom Behavior
-You can "teach" PR Pilot new behaviors by creating a `pilot-behaviors.yaml` file in your repository.
+You can "teach" PR Pilot new behaviors by creating a `pilot-behavior.yaml` file in your repository.
 This file contains a list of **custom behaviors** that PR Pilot will use when running tasks in your repository:
 
 ```yaml
