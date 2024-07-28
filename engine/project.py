@@ -89,7 +89,7 @@ class Project(BaseModel):
     def load_pilot_behaviors(self, task, project_info) -> List[StructuredTool]:
         """Load agent behaviors from the repository"""
         file_system = FileSystem()
-        node = file_system.get_node(Path("..pilot-behavior.yaml"))
+        node = file_system.get_node(Path(".pilot-behavior.yaml"))
         if node:
             try:
                 behaviors = yaml.safe_load(node.content)
@@ -100,10 +100,10 @@ class Project(BaseModel):
                     for behavior in behaviors
                 ]
             except ScannerError:
-                raise ValueError("Invalid YAML in ..pilot-behavior.yaml")
+                raise ValueError("Invalid YAML in .pilot-behavior.yaml")
             except ValidationError as e:
                 raise ValueError(
-                    f"Invalid agent behavior in ..pilot-behavior.yaml: {e}"
+                    f"Invalid agent behavior in .pilot-behavior.yaml: {e}"
                 )
 
             logger.info(f"Loaded {len(tools)} agent behaviors from {self.name}")
