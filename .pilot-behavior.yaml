@@ -1,0 +1,7 @@
+- title: Review pull request
+  args:
+    pr_number: Pull request number
+  instructions: |
+    1. Read the pull request
+    2. Review the changes
+    3. Comment on the PR with feedback
