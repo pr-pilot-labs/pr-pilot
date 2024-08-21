@@ -102,9 +102,7 @@ class Project(BaseModel):
             except ScannerError:
                 raise ValueError("Invalid YAML in .pilot-behavior.yaml")
             except ValidationError as e:
-                raise ValueError(
-                    f"Invalid agent behavior in .pilot-behavior.yaml: {e}"
-                )
+                raise ValueError(f"Invalid agent behavior in .pilot-behavior.yaml: {e}")
 
             logger.info(f"Loaded {len(tools)} agent behaviors from {self.name}")
             return tools

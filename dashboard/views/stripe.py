@@ -39,7 +39,9 @@ def create_stripe_payment_link(request):
                 "credits": int(credits),
             },
         )
-        logger.info(f"Payment link created for user {request.user} requesting {credits} credits")
+        logger.info(
+            f"Payment link created for user {request.user} requesting {credits} credits"
+        )
         return HttpResponseRedirect(payment_link.url)
     except stripe.error.StripeError as e:
         logger.error(f"Payment error for user {request.user}: {e}")

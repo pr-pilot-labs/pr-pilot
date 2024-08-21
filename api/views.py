@@ -220,7 +220,6 @@ class TaskViewSet(APIView):
 @permission_classes([HasUserAPIKey])
 def get_pr_number(request):
     """Retrieve the PR number for a given repo and branch."""
-    api_key = UserAPIKey.objects.get_from_key(request.headers["X-Api-Key"])
     github_repo = request.data.get("github_repo")
     branch = request.data.get("branch")
 
