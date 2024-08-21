@@ -18,4 +18,5 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("resolve-pr/", views.get_pr_number, name="resolve_pr"),
 ]

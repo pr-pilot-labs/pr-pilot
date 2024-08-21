@@ -183,3 +183,69 @@ class TaskViewSet(APIView):
             serializer = TaskSerializer(task)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema(
+    request=inline_serializer(
+        name="RepoBranchInput",
+        fields={
+            "github_repo": serializers.CharField(),
+            "branch": serializers.CharField(),
+        },
+    ),
+    responses={
+        status.HTTP_200_OK: inline_serializer(
+            name="PRNumberResponse",
+            fields={"pr_number": serializers.IntegerField()},
+        ),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(
+            response=inline_serializer(
+                name="NotFound",
+                fields={"error": serializers.CharField()},
+            ),
+            examples=[
+                OpenApiExample(
+                    "PRNotFound",
+                    summary="PR Not Found",
+                    description="No PR found for the specified branch",
+                    value={"error": "PR not found"},
+                )
+            ],
+            description="No PR found for the specified branch.",
+        ),
+    },
+    tags=["PR Retrieval"],
+)
+@api_view(["POST"])
+@permission_classes([HasUserAPIKey])
+def get_pr_number(request):
+    """Retrieve the PR number for a given repo and branch."""
+    api_key = UserAPIKey.objects.get_from_key(request.headers["X-Api-Key"])
+    github_repo = request.data.get("github_repo")
+    branch = request.data.get("branch")
+
+    if not github_repo or not branch:
+        return Response(
+            {"error": "github_repo and branch are required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        repo = GithubRepository.objects.get(full_name=github_repo)
+    except GithubRepository.DoesNotExist:
+        return Response(
+            {
+                "error": "PR Pilot is not installed for this repository. "
+                "Please go to https://github.com/apps/pr-pilot-ai/installations/new to install PR Pilot."
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    g = Github(get_installation_access_token(repo.installation.installation_id))
+    pulls = g.get_repo(repo.full_name).get_pulls(state="open", head=branch)
+
+    if pulls.totalCount == 0:
+        return Response({"error": "PR not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    pr_number = pulls[0].number
+    return Response({"pr_number": pr_number}, status=status.HTTP_200_OK)
