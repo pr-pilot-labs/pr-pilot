@@ -72,6 +72,7 @@ Never return the code changes in your response.
 - When creating a new issue, include a link back to the original issue or PR in the body
 - New issue titles should be descriptive, concise and have an emoji at the beginning
 
+{custom_skills}
 """
 
 template = """
@@ -399,7 +400,7 @@ def create_pr_pilot_agent(
     ] + additional_tools
     primer = SystemMessagePromptTemplate(
         prompt=PromptTemplate(
-            input_variables=["github_project", "project_info"],
+            input_variables=["github_project", "project_info", "custom_skills"],
             template=system_message,
         )
     )

@@ -190,15 +190,25 @@ class TaskEngine:
             date_and_time = (
                 timezone.now().isoformat() + " " + str(timezone.get_current_timezone())
             )
+            pilot_skills = self.project.load_pilot_skills(self.task, project_info)
             executor = create_pr_pilot_agent(
                 self.task.gpt_model,
                 image_support=self.task.image is not None,
                 additional_tools=integration_tools_for_user(
                     PilotUser.objects.get(username=self.task.github_user)
                 )
-                + self.project.load_pilot_behaviors(self.task, project_info),
+                + pilot_skills,
             )
-
+            custom_skills = "-"
+            if pilot_skills:
+                custom_skills = "# Custom Skills\n"
+                custom_skills += (
+                    "For this project, the user has defined the following 'skills', which you can use "
+                    "to fulfill tasks more efficiently. Each skill is a function you can execute "
+                    "when asked to do so.\n\n"
+                )
+                for skill in pilot_skills:
+                    custom_skills += f"- `{skill.name}` - {skill.description}\n\n"
             executor_result = executor.invoke(
                 {
                     "encoded_image_url": f"data:image/png;base64,{image_base64}",
@@ -207,6 +217,7 @@ class TaskEngine:
                     "project_info": project_info,
                     "pilot_hints": self.project.load_pilot_hints(),
                     "current_time": date_and_time,
+                    "custom_skills": custom_skills,
                 }
             )
             self.task.result = executor_result["output"]

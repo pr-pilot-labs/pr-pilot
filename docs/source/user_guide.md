@@ -147,9 +147,9 @@ pilot history last <n> prompt --markdown | pbcopy
 ### Personalization and Customization
 PR Pilot aims to streamline your workflow by reducing friction and saving you time.
 
-#### Custom Behavior
-You can "teach" PR Pilot new behaviors by creating a `pilot-behavior.yaml` file in your repository.
-This file contains a list of **custom behaviors** that PR Pilot will use when running tasks in your repository:
+#### Custom Skill
+You can "teach" PR Pilot new skills by creating a `pilot-skills.yaml` file in your repository.
+This file contains a list of **custom skills** that PR Pilot will use when running tasks in your repository:
 
 ```yaml
 - title: Scramble a file
@@ -169,7 +169,7 @@ This file contains a list of **custom behaviors** that PR Pilot will use when ru
     3. Write the file to <original_name>.<new_lang>.<original_ending>
 ```
 
-Now, you can run this behavior in any task:
+Now, you can run this skill in any task:
 
 ```bash
 ➜ pilot task "Translate the README file into French and then scramble the translated file"

@@ -1,0 +1,13 @@
+- title: Add API endpoint
+  args:
+    method: HTTP method
+    purpose: What the endpoint does
+    url: URL of the endpoint
+    response: Expected response from the endpoint
+  instructions: |
+    Add a new API endpoint by doing the following:
+    1. Read `api/views.py` and understand how the API views are implemented
+    2. Add a new endpoint to the API and write it back to `api/views.py`
+    3. Add the path for the new endpoint to `api/urls.py` 
+    4. Write tests for the new endpoint in `api/tests/test_api.py`
+    5. Respond with a bullet point list of the changes you made

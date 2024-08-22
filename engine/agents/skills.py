@@ -15,17 +15,17 @@ MAX_TOOL_NAME_LEN = 35
 logger = logging.getLogger(__name__)
 
 
-def build_agent_behavior_tool_function(task, project_info, pilot_hints, instructions):
-    """Build a function that will be used to create a LangChain tool for the agent behavior.
+def build_agent_skill_tool_function(task, project_info, pilot_hints, instructions):
+    """Build a function that will be used to create a LangChain tool for the agent skill.
     Args:
         task: Task object
         project_info: Project information
         pilot_hints: Pilot hints
         instructions: Instructions for the agent
-        Returns: A function that will be used to create a LangChain tool for the agent behavior
+        Returns: A function that will be used to create a LangChain tool for the agent skill
     """
 
-    def agent_behavior_tool_function(**input):
+    def agent_skill_tool_function(**input):
 
         from engine.agents.pr_pilot_agent import create_pr_pilot_agent
 
@@ -49,23 +49,22 @@ def build_agent_behavior_tool_function(task, project_info, pilot_hints, instruct
                 "project_info": project_info,
                 "pilot_hints": pilot_hints,
                 "current_time": date_and_time,
+                "custom_skills": "",
             }
         )
         return executor_result["output"]
 
-    return agent_behavior_tool_function
+    return agent_skill_tool_function
 
 
-class AgentBehavior(BaseModel):
-    """User-defined behavior for the PR Pilot agent."""
+class AgentSkill(BaseModel):
+    """User-defined skill for the PR Pilot agent."""
 
-    title: str = Field(..., title="Short title of the behavior")
-    args: Optional[dict] = Field(
-        None, title="Arguments required to perform the behavior"
-    )
+    title: str = Field(..., title="Short title of the skill")
+    args: Optional[dict] = Field(None, title="Arguments required to perform the skill")
     instructions: str = Field(..., title="Instructions for the agent")
     result: Optional[str] = Field(
-        "A short summary of your actions", title="Expected result of the behavior"
+        "A short summary of your actions", title="Expected result of the skill"
     )
 
     @property
@@ -73,20 +72,20 @@ class AgentBehavior(BaseModel):
         return slugify(self.title)[:MAX_TOOL_NAME_LEN].replace("-", "_")
 
     def to_agent_tool(self, task, project_info, pilot_hints):
-        """Convert the user-defined behavior to a LangChain tool."""
+        """Convert the user-defined skill to a LangChain tool."""
         final_instructions = self.instructions
         if self.result:
             final_instructions += f"\n\nRespond with: {self.result}"
         fields = {}
         for key, value in self.args.items():
             fields[key.replace(" ", "-")] = (str, FieldInfo(title=value))
-        AgentBehaviorToolSchema = create_model("AgentBehaviorToolSchema", **fields)
+        AgentSkillToolSchema = create_model("AgentSkillToolSchema", **fields)
 
         return StructuredTool(
             name=self.slug,
-            func=build_agent_behavior_tool_function(
+            func=build_agent_skill_tool_function(
                 task, project_info, pilot_hints, self.instructions
             ),
             description=self.title,
-            args_schema=AgentBehaviorToolSchema,
+            args_schema=AgentSkillToolSchema,
         )

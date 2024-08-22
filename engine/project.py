@@ -10,7 +10,7 @@ from langchain_core.tools import StructuredTool
 from pydantic import Field, BaseModel, ValidationError
 from yaml.scanner import ScannerError
 
-from engine.agents.behavior import AgentBehavior
+from engine.agents.skills import AgentSkill
 from engine.file_system import FileSystem
 from engine.models.task_event import TaskEvent
 from engine.models.task import Task
@@ -86,28 +86,28 @@ class Project(BaseModel):
         node = file_system.get_node(Path(".pilot-hints.md"))
         return node.content if node else ""
 
-    def load_pilot_behaviors(self, task, project_info) -> List[StructuredTool]:
-        """Load agent behaviors from the repository"""
+    def load_pilot_skills(self, task, project_info) -> List[StructuredTool]:
+        """Load agent skills from the repository"""
         file_system = FileSystem()
-        node = file_system.get_node(Path(".pilot-behavior.yaml"))
+        node = file_system.get_node(Path(".pilot-skills.yaml"))
         if node:
             try:
-                behaviors = yaml.safe_load(node.content)
+                skills = yaml.safe_load(node.content)
                 tools = [
-                    AgentBehavior(**behavior).to_agent_tool(
+                    AgentSkill(**skill).to_agent_tool(
                         task, project_info, self.load_pilot_hints()
                     )
-                    for behavior in behaviors
+                    for skill in skills
                 ]
             except ScannerError:
-                raise ValueError("Invalid YAML in .pilot-behavior.yaml")
+                raise ValueError("Invalid YAML in .pilot-skills.yaml")
             except ValidationError as e:
-                raise ValueError(f"Invalid agent behavior in .pilot-behavior.yaml: {e}")
+                raise ValueError(f"Invalid agent skill in .pilot-skills.yaml: {e}")
 
-            logger.info(f"Loaded {len(tools)} agent behaviors from {self.name}")
+            logger.info(f"Loaded {len(tools)} agent skills from {self.name}")
             return tools
         else:
-            logger.info("No agent behaviors found")
+            logger.info("No agent skills found")
         return []
 
     def discard_all_changes(self):
