@@ -11,3 +11,20 @@
     3. Add the path for the new endpoint to `api/urls.py` 
     4. Write tests for the new endpoint in `api/tests/test_api.py`
     5. Respond with a bullet point list of the changes you made
+- title: Report a bug
+  args:
+    description: Description of the bug
+    steps_to_reproduce: Steps to reproduce the bug
+    observed_behavior: Observed behavior of the bug
+    expected_behavior: Expected behavior of the bug
+    relevant_files: Relevant files to the bug
+  instructions: |
+    Report a bug by doing the following:
+    1. Read the relevant files to understand the bug
+    2. Create a new issue on Github with the following details:
+      - The given description
+      - Steps to reproduce the bug
+      - Observed behavior and expected behavior
+      - Technical details based on what you found in the files
+    3. Post a notification in the #qa-team Slack channel with a link to the issue
+  result: Links to the Github issue and the Slack message
