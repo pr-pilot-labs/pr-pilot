@@ -74,4 +74,6 @@
     2. Find the issue that best matches the given description
     3. Read the three most recent events for the issue and collect technical details (stack trace, etc)
     4. Find and read the relevant code files to understand the context of the error
+    5. Write a concise description of the error and relevant technical details
+    IMPORTANT: Do NOT attempt to fix or report the error, only gather information and respond.
   result: A concise description of the error and relevant technical details
