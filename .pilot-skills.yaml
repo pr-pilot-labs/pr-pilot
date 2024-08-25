@@ -1,3 +1,4 @@
+# Add a new endpoint and write tests for it
 - title: Add API endpoint
   args:
     method: HTTP method
@@ -10,7 +11,8 @@
     2. Add a new endpoint to the API and write it back to `api/views.py`
     3. Add the path for the new endpoint to `api/urls.py` 
     4. Write tests for the new endpoint in `api/tests/test_api.py`
-    5. Respond with a bullet point list of the changes you made
+
+# Write a comprehensive bug report, gather information and notify the QA team
 - title: Report a bug
   args:
     description: Description of the bug
@@ -28,3 +30,35 @@
       - Technical details based on what you found in the files
     3. Post a notification in the #qa-team Slack channel with a link to the issue
   result: Links to the Github issue and the Slack message
+
+# Write a comprehensive PR description, generate a title and description for a PR
+- title: Answer question about this project
+  arg:
+    question: Question about the project
+  instructions: |
+    A colleague has a question about this project. Do the following:
+    1. Read `.pilot-skills.yaml` and `README.md` to understand the project better
+    2. If the user mentions specific files, read them to get more context
+    3. If the user mentions specific code, search for it in the project
+    4. Answer the question to the best of your ability
+  result: A concise answer to the question
+
+# Find and update relevant Kubernetes resources
+- title: Change the Helm Chart
+  args:
+    change_request: Description of the change
+  instructions: |
+    We want to update the Helm Chart. Do the following:
+    1. Determine the relevant files in the Helm Chart by listing the `helm-chart/templates` directory
+    2. Read the relevant files and update them accordingly
+    3. Write the changes back to the Helm Chart
+
+# Update the user documentation
+- title: Update the user documentation
+  args:
+      what_changed: What part of PR Pilot changed
+  instructions: |
+      We want to update the user documentation. Do the following:
+      1. Determine the relevant files in the `docs/source` directory
+      2. Read the relevant files and update them accordingly
+      3. Write the changes back to the user documentation
