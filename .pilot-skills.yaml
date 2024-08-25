@@ -33,7 +33,7 @@
 
 # Write a comprehensive PR description, generate a title and description for a PR
 - title: Answer question about this project
-  arg:
+  args:
     question: Question about the project
   instructions: |
     A colleague has a question about this project. Do the following:
