@@ -63,3 +63,15 @@
     1. Determine the relevant files in the `docs/source` directory
     2. Read the relevant files and update them accordingly
     3. Write the changes back to the user documentation
+
+# Find an error on Sentry and gather technical information
+- title: Find and investigate error on Sentry
+  args:
+    error_to_find: Description of the error
+  instructions: |
+    Investigate an error on Sentry by doing the following:
+    1. List all open Sentry issues
+    2. Find the issue that best matches the given description
+    3. Read the three most recent events for the issue and collect technical details (stack trace, etc)
+    4. Find and read the relevant code files to understand the context of the error
+  result: A concise description of the error and relevant technical details
