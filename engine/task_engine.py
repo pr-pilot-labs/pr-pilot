@@ -202,13 +202,10 @@ class TaskEngine:
             custom_skills = "-"
             if pilot_skills:
                 custom_skills = "# Custom Skills\n"
-                custom_skills += (
-                    "For this project, the user has defined the following 'skills':\n\n"
-                )
+                custom_skills += "For this project, the user has defined the following 'skills' for you:\n\n"
                 for skill in pilot_skills:
-                    custom_skills += f"- Function `{skill.name}`, skill \"{skill.description}\"\n"
-                custom_skills += ("\nYou MUST execute the relevant function if the user mentions "
-                                  "one of these skills in their request.\n\n")
+                    custom_skills += f'- `{skill.name}` - "{skill.description}"\n'
+                custom_skills += "\nEach of the skills is a function that you MUST call when prompted to do so.\n\n"
             executor_result = executor.invoke(
                 {
                     "encoded_image_url": f"data:image/png;base64,{image_base64}",

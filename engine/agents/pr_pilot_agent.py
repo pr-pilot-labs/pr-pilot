@@ -418,7 +418,9 @@ def create_pr_pilot_agent(
     scratchpad = MessagesPlaceholder(variable_name="agent_scratchpad")
     final_system_message = SystemMessage(
         "Fulfill the user request autonomously and respond to them, "
-        "without asking for further input. If anything fails along the way, abort and provide a reason."
+        "without asking for further input. If anything fails along the way, abort and provide a reason.\n"
+        "IMPORTANT: If the user mentions a project-specific skill, you MUST call the relevant "
+        "function to fulfill the request."
     )
     all_messages = [
         primer,
