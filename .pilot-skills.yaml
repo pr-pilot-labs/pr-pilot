@@ -56,9 +56,9 @@
 # Update the user documentation
 - title: Update the user documentation
   args:
-      what_changed: What part of PR Pilot changed
+    what_changed: What part of PR Pilot changed
   instructions: |
-      We want to update the user documentation. Do the following:
-      1. Determine the relevant files in the `docs/source` directory
-      2. Read the relevant files and update them accordingly
-      3. Write the changes back to the user documentation
+    We want to update the user documentation. Do the following:
+    1. Determine the relevant files in the `docs/source` directory
+    2. Read the relevant files and update them accordingly
+    3. Write the changes back to the user documentation
