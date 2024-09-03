@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "PR Pilot"
-copyright = "2024, Marco Lamina"
+copyright = "2024, Arcane Engineering"
 author = "Marco Lamina"
 
 # -- General configuration ---------------------------------------------------
@@ -30,6 +30,8 @@ html_theme_options = {
     "base_url": "https://docs.pr-pilot.ai",
     "repo_url": "https://github.com/PR-Pilot-AI/pr-pilot",
     "repo_name": "PR Pilot",
+    "color_primary": "white",
+    "color_accent": "blue",
     "html_minify": True,
     "css_minify": True,
     "nav_title": "PR Pilot",
@@ -53,10 +55,16 @@ html_theme_options = {
             "internal": False,
             "title": "Blog",
         },
+        {
+            "href": "https://arcane.engineer",
+            "internal": False,
+            "title": "About Us",
+        },
     ],
     "heroes": {
         "index": "Transform your Development Workflow",
     },
+
 }
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
