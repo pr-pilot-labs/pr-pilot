@@ -70,7 +70,7 @@ Respond with a link to the Slack message.
 
 def run_e2e_test():
     task = create_task(
-        "Tell me what you know about this project",
+        "Scramble the README file",
         model="gpt-4o",
     )
     settings.TASK_ID = str(task.id)

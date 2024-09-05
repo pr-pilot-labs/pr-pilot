@@ -8,6 +8,7 @@ from pydantic.v1.fields import FieldInfo
 
 from accounts.models import PilotUser
 from engine.agents.integration_tools import integration_tools_for_user
+from engine.models.task_event import TaskEvent
 from engine.util import slugify
 
 MAX_TOOL_NAME_LEN = 35
@@ -15,13 +16,14 @@ MAX_TOOL_NAME_LEN = 35
 logger = logging.getLogger(__name__)
 
 
-def build_agent_skill_tool_function(task, project_info, pilot_hints, instructions):
+def build_agent_skill_tool_function(task, project_info, pilot_hints, instructions, skill_title):
     """Build a function that will be used to create a LangChain tool for the agent skill.
     Args:
         task: Task object
         project_info: Project information
         pilot_hints: Pilot hints
         instructions: Instructions for the agent
+        skill_title: Title of the skill
         Returns: A function that will be used to create a LangChain tool for the agent skill
     """
 
@@ -36,6 +38,14 @@ def build_agent_skill_tool_function(task, project_info, pilot_hints, instruction
                 PilotUser.objects.get(username=task.github_user)
             ),
         )
+
+        TaskEvent.add(
+            actor="assistant",
+            action="invoke_skill",
+            target=skill_title,
+            message=f"Invoking skill: `{skill_title}`",
+        )
+        logger.info(f"Invoking skill on project {task.github_project}: {skill_title}")
 
         date_and_time = (
             timezone.now().isoformat() + " " + str(timezone.get_current_timezone())
@@ -52,6 +62,13 @@ def build_agent_skill_tool_function(task, project_info, pilot_hints, instruction
                 "custom_skills": "",
             }
         )
+        TaskEvent.add(
+            actor="assistant",
+            action="finish_skill",
+            target=skill_title,
+            message=executor_result["output"],
+        )
+        logger.info(f"Finished skill execution on project {task.github_project}: {skill_title}")
         return executor_result["output"]
 
     return agent_skill_tool_function
@@ -84,7 +101,7 @@ class AgentSkill(BaseModel):
         return StructuredTool(
             name=self.slug,
             func=build_agent_skill_tool_function(
-                task, project_info, pilot_hints, self.instructions
+                task, project_info, pilot_hints, self.instructions, self.title
             ),
             description=self.title,
             args_schema=AgentSkillToolSchema,
