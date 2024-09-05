@@ -98,17 +98,32 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <p>
+                            When PR Pilot does work for you, it consumes credits (<a href="https://docs.pr-pilot.ai/pricing.html" target="_blank">Pricing</a>).
+                            We offer secure payment through <a href="https://stripe.com/" target="_blank">Stripe</a> to refill your credits.
+                        </p>
                         <form id="refillCreditsForm">
                             <div class="mb-3">
-                                <label for="creditsAmount" class="form-label">Amount of Credits</label>
+                                <label for="creditsAmount" class="form-label text-muted"></label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-coins"></i></span>
                                     <input type="number" class="form-control" id="creditsAmount" placeholder="100 Credits = $1" required>
                                 </div>
                                 <div id="error-message" class="text-danger mt-2" style="display: none;">Amount must be greater than 50.</div>
                             </div>
-                            <button type="submit" id="refillButton" class="btn btn-primary d-block w-100">Refill</button>
+                            <button type="submit" id="refillButton" class="btn btn-primary d-block w-100">Checkout with Stripe</button>
+
                         </form>
+                    </div>
+                    <div class="modal-footer text-center">
+                        <small>
+                        <a href="https://www.pr-pilot.ai/terms-of-service" target="_blank">
+                            Terms of Service
+                        </a> &
+                        <a href="https://www.pr-pilot.ai/privacy-policy" target="_blank">
+                            Privacy Policy
+                        </a>
+                        </small>
                     </div>
                 </div>
             </div>

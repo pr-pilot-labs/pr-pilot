@@ -22,11 +22,7 @@ def create_stripe_payment_link(request):
         return HttpResponseRedirect(reverse("task_list"))
 
     stripe.api_key = settings.STRIPE_API_KEY
-    price = (
-        "price_1OvuaJCyRBEZZGEuL8I9b308"
-        if settings.DEBUG
-        else "price_1OwBvgCyRBEZZGEuAbzUzfRF"
-    )
+    price = settings.STRIPE_PRICE_ID
     try:
         payment_link = stripe.PaymentLink.create(
             line_items=[{"price": price, "quantity": int(credits)}],
