@@ -7,59 +7,72 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
 </head>
 <body>
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <p class="title">
+                PR Pilot Onboarding Guide
+            </p>
+            <p class="subtitle">
+                Welcome to the PR Pilot project!
+            </p>
+        </div>
+    </section>
+
     <section class="section">
         <div class="container">
-            <h1 class="title">Welcome to PR Pilot</h1>
-            <p class="subtitle">Your guide to getting started with our developer tool</p>
+            <div class="tabs is-boxed">
+                <ul>
+                    <li class="is-active"><a>Overview</a></li>
+                    <li><a>Task Engine</a></li>
+                    <li><a>Budget Management</a></li>
+                </ul>
+            </div>
 
             <div class="content">
-                <h2>Project Overview</h2>
-                <p>PR Pilot is a developer tool designed to assist developers in their daily tasks. It integrates with various development tools and provides a seamless workflow. The project is built using Django, Python, Docker, and Kubernetes.</p>
+                <div id="overview">
+                    <h2 class="title">Project Overview</h2>
+                    <p>PR Pilot is a developer tool designed to assist developers in their daily tasks. It integrates with various development tools and provides a seamless workflow. The project is built using Django, Python, Docker, and Kubernetes.</p>
+                    <div class="box">
+                        <h3 class="subtitle">Key Components:</h3>
+                        <ul>
+                            <li><strong>API:</strong> Implemented with Django DRF, it provides endpoints for creating tasks and viewing history.</li>
+                            <li><strong>Dashboard:</strong> Built with Django templates and views, using Bootstrap 5 for the frontend.</li>
+                            <li><strong>Task Engine:</strong> Manages and runs tasks created via prompts, API, or webhooks.</li>
+                            <li><strong>Tests:</strong> Organized using pytest, with fixtures and parameterization.</li>
+                            <li><strong>Deployment:</strong> Managed with Helm Charts in a Kubernetes cluster, with deployment commands in the Makefile.</li>
+                            <li><strong>Documentation:</strong> Created using Sphinx.</li>
+                        </ul>
+                    </div>
+                </div>
 
-                <h3>Key Components</h3>
-                <ul>
-                    <li><strong>API:</strong> Implemented with Django DRF, it provides endpoints for creating tasks and viewing history.</li>
-                    <li><strong>Dashboard:</strong> Built with Django templates and views, using Bootstrap 5 for the frontend.</li>
-                    <li><strong>Task Engine:</strong> Manages and runs tasks created via prompts, API, or webhooks.</li>
-                    <li><strong>Tests:</strong> Organized using pytest, with fixtures and parameterization.</li>
-                    <li><strong>Deployment:</strong> Managed with Helm Charts in a Kubernetes cluster, with deployment commands in the Makefile.</li>
-                    <li><strong>Documentation:</strong> Created using Sphinx.</li>
-                </ul>
+                <div id="task-engine">
+                    <h2 class="title">Task Engine</h2>
+                    <p>The <strong>TaskEngine</strong> is a core component of the PR Pilot project, responsible for managing and executing tasks.</p>
+                    <div class="box">
+                        <h3 class="subtitle">Key Responsibilities:</h3>
+                        <ul>
+                            <li><strong>Initialization:</strong> Sets up the environment and GitHub repository details.</li>
+                            <li><strong>Branch Management:</strong> Creates unique branch names, sets up working branches, and finalizes them by committing and pushing changes.</li>
+                            <li><strong>Task Execution:</strong> Runs tasks by checking out the appropriate branch, generating task titles, and invoking the PR Pilot agent to perform the task.</li>
+                            <li><strong>Budget Management:</strong> Checks user budget before running tasks and updates it after task completion.</li>
+                            <li><strong>Error Handling:</strong> Manages errors and updates task status accordingly.</li>
+                            <li><strong>Broadcasting:</strong> Sends status updates to the task's websocket channel.</li>
+                        </ul>
+                    </div>
+                </div>
 
-                <h2>Task Engine</h2>
-                <p>The <strong>TaskEngine</strong> is a core component of the PR Pilot project, responsible for managing and executing tasks.</p>
-
-                <h3>Key Responsibilities</h3>
-                <ul>
-                    <li>Initialization: Sets up the environment and GitHub repository details.</li>
-                    <li>Branch Management: Creates unique branch names, sets up working branches, and finalizes them by committing and pushing changes.</li>
-                    <li>Task Execution: Runs tasks by checking out the appropriate branch, generating task titles, and invoking the PR Pilot agent to perform the task.</li>
-                    <li>Budget Management: Checks user budget before running tasks and updates it after task completion.</li>
-                    <li>Error Handling: Manages errors and updates task status accordingly.</li>
-                    <li>Broadcasting: Sends status updates to the task's websocket channel.</li>
-                </ul>
-
-                <h2>Budget Management</h2>
-                <p>Budget management in the <strong>TaskEngine</strong> works by checking the user's available budget before executing a task and updating it after the task is completed.</p>
-
-                <h3>Process</h3>
-                <ul>
-                    <li><strong>Check User Budget:</strong> Before running a task, the TaskEngine checks the user's budget. If the budget is less than zero, the task is marked as failed, and the user is notified to add credits.</li>
-                    <li><strong>Create Bill:</strong> After the task is completed, a bill is created using the TaskBill model. The total credits used for the task are calculated, and any applicable discounts are applied.</li>
-                    <li><strong>Update Budget:</strong> The user's budget is then updated by subtracting the final cost of the task from their remaining budget. The updated budget is saved back to the database.</li>
-                </ul>
-
-                <h2>Getting Started</h2>
-                <p>To get started with PR Pilot, follow these steps:</p>
-                <ol>
-                    <li>Clone the repository from GitHub.</li>
-                    <li>Set up your development environment using Docker and Kubernetes.</li>
-                    <li>Familiarize yourself with the API and Dashboard components.</li>
-                    <li>Run the tests using pytest to ensure everything is set up correctly.</li>
-                    <li>Deploy the application using the Helm Charts provided.</li>
-                </ol>
-
-                <p>We hope this guide helps you get up to speed with PR Pilot. If you have any questions, feel free to reach out to the team.</p>
+                <div id="budget-management">
+                    <h2 class="title">Budget Management</h2>
+                    <p>Budget management in the <strong>TaskEngine</strong> works by checking the user's available budget before executing a task and updating it after the task is completed.</p>
+                    <div class="box">
+                        <h3 class="subtitle">Process:</h3>
+                        <ul>
+                            <li><strong>Check User Budget:</strong> Before running a task, the TaskEngine checks the user's budget. If the budget is less than zero, the task is marked as failed, and the user is notified to add credits.</li>
+                            <li><strong>Create Bill:</strong> After the task is completed, a bill is created using the TaskBill model. The total credits used for the task are calculated, and any applicable discounts are applied.</li>
+                            <li><strong>Update Budget:</strong> The user's budget is then updated by subtracting the final cost of the task from their remaining budget. The updated budget is saved back to the database.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
