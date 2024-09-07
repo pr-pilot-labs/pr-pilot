@@ -77,3 +77,19 @@
     5. Write a concise description of the error and relevant technical details
     IMPORTANT: Do NOT attempt to fix or report the error, only gather information and respond.
   result: A concise description of the error and relevant technical details
+
+- title: Make a beautiful HTML page
+  args:
+    content: Content of the page
+    purpose: What the page does
+    file_path: Path into which the page will be saved
+  instructions: |
+    1. Search the internet for the latest BulmaCSS CDN version
+    2. Generate a self-contained HTML page that combines the given content with BulmaCSS
+    3. Write the HTML page to the given file path
+    
+    When generating the page, follow these rules:
+    - Use the latest BulmaCSS version
+    - Organize the content in a visually appealing way using Bulma components
+    - Use FA icons and emojis to make the page more engaging
+    - Make full use of Bulma CSS classes to style the page
