@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Pilot Onboarding Guide</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body { padding: 20px; }
+        h1, h2, h3 { margin-top: 20px; }
+        p { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title">PR Pilot Onboarding Guide</h1>
+            <p>Welcome to the PR Pilot project! This guide will help you get started with understanding the key components and functionalities of the project.</p>
+
+            <h2 class="subtitle">Helm Charts</h2>
+            <p>This project uses Helm charts for deploying the application to a Kubernetes cluster. The Helm charts are located in the <code>helm-chart/</code> directory. They define the Kubernetes resources needed for the deployment, such as pods, services, and configurations, and allow for easy management and versioning of these resources. Deployment is done manually using commands specified in the Makefile.</p>
+
+            <h2 class="subtitle">TaskEngine Class</h2>
+            <p>The <code>TaskEngine</code> class is responsible for managing and executing tasks within the PR Pilot project. Here's a concise overview of how it works:</p>
+            <ul>
+                <li><strong>Initialization</strong>: The <code>TaskEngine</code> is initialized with a <code>Task</code> object and optional parameters like <code>max_steps</code>. It sets up the GitHub repository and project details.</li>
+                <li><strong>Branch Management</strong>: It includes methods to create unique branch names, set up working branches, and finalize them by committing and pushing changes.</li>
+                <li><strong>Task Execution</strong>: The <code>run</code> method is the core of the <code>TaskEngine</code>. It handles the task execution flow, including:
+                    <ul>
+                        <li>Checking user budget.</li>
+                        <li>Generating task titles.</li>
+                        <li>Cloning the GitHub repository.</li>
+                        <li>Checking out the appropriate branch.</li>
+                        <li>Invoking the PR Pilot agent to perform the task.</li>
+                        <li>Handling the results and creating pull requests if necessary.</li>
+                    </ul>
+                </li>
+                <li><strong>Billing</strong>: It calculates and applies any discounts for open-source projects and updates the user's budget.</li>
+                <li><strong>Broadcasting</strong>: It broadcasts status updates and task results to the relevant channels.</li>
+            </ul>
+
+            <h2 class="subtitle">API Overview</h2>
+            <p>The API in the PR Pilot project is implemented using Django REST Framework (DRF) and is located in the <code>api/</code> directory. Here's a concise overview of how it works:</p>
+            <ul>
+                <li><strong>Endpoints</strong>: The API provides endpoints for creating tasks, viewing task history, and other related operations. These endpoints are used by the SDK, CLI, GitHub actions, and other integrations.</li>
+                <li><strong>Views</strong>: The views in the API handle the HTTP requests and responses. They interact with the underlying models and serializers to process the data and return the appropriate responses.</li>
+                <li><strong>Serializers</strong>: Serializers are used to convert complex data types, such as querysets and model instances, into native Python data types that can be easily rendered into JSON or other content types. They also handle validation and deserialization of input data.</li>
+                <li><strong>Authentication and Permissions</strong>: The API uses DRF's built-in authentication and permission classes to secure the endpoints. This ensures that only authorized users can access or modify the data.</li>
+                <li><strong>Task Management</strong>: The core functionality of the API revolves around task management. It allows users to create new tasks, check the status of existing tasks, and retrieve task results.</li>
+            </ul>
+
+            <h2 class="subtitle">Defined Endpoints</h2>
+            <p>The API defines the following endpoints:</p>
+            <ul>
+                <li><code>/tasks/</code>: Handled by <code>TaskViewSet</code>. This endpoint is used for creating and managing tasks.</li>
+                <li><code>/tasks/&lt;uuid:pk&gt;/</code>: Handled by <code>get_task</code>. This endpoint retrieves a specific task by its UUID.</li>
+                <li><code>/openapi.yaml</code>: Handled by <code>SpectacularAPIView</code>. This endpoint provides the OpenAPI schema for the API.</li>
+                <li><code>/swagger-ui/</code>: Handled by <code>SpectacularSwaggerView</code>. This endpoint provides a Swagger UI for interacting with the API.</li>
+                <li><code>/redoc/</code>: Handled by <code>SpectacularRedocView</code>. This endpoint provides a ReDoc UI for interacting with the API.</li>
+                <li><code>/resolve-pr/</code>: Handled by <code>get_pr_number</code>. This endpoint resolves and retrieves the pull request number.</li>
+            </ul>
+
+            <h2 class="subtitle">User Documentation</h2>
+            <p>You can find the user documentation in the <code>docs/</code> directory. The main files to look at are:</p>
+            <ul>
+                <li><code>docs/README.md</code>: Provides an overview and instructions for building the documentation.</li>
+                <li><code>docs/source/</code>: Contains the source files for the Sphinx documentation.</li>
+            </ul>
+
+            <h2 class="subtitle">What is Sphinx?</h2>
+            <p>Sphinx is a documentation generator that converts reStructuredText files into various output formats, such as HTML, PDF, and ePub. It is widely used for creating project documentation, especially for Python projects. Sphinx supports extensive configuration options, extensions, and themes, making it a powerful tool for generating comprehensive and well-structured documentation. In the PR Pilot project, Sphinx is used to build the user documentation located in the <code>docs/</code> directory.</p>
+
+            <h2 class="subtitle">Generating Documentation</h2>
+            <p>To generate the documentation for the PR Pilot project using Sphinx, follow these steps:</p>
+            <ol>
+                <li><strong>Navigate to the <code>docs/</code> directory</strong>:
+                    <pre><code>cd docs/</code></pre>
+                </li>
+                <li><strong>Build the documentation</strong>:
+                    <p>You can use the Makefile to build the documentation in various formats. For example, to build the HTML documentation, run:</p>
+                    <pre><code>make html</code></pre>
+                </li>
+                <li><strong>View the generated documentation</strong>:
+                    <p>The generated HTML files will be located in the <code>_build/html/</code> directory. You can open the <code>index.html</code> file in a web browser to view the documentation.</p>
+                </li>
+            </ol>
+        </div>
+    </section>
+</body>
+</html>
