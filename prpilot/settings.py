@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "channels",
     "api",
+    "hub",
 ]
 
 MIDDLEWARE = [

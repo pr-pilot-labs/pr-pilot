@@ -18,6 +18,7 @@ class GithubRepository(models.Model):
     installation = models.ForeignKey(
         "GitHubAppInstallation", on_delete=models.CASCADE, related_name="repositories"
     )
+    knowledge = models.TextField(null=True, blank=True)
 
 
 class GitHubAppInstallation(models.Model):

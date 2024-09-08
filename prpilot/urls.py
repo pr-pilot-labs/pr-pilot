@@ -40,6 +40,7 @@ urlpatterns = [
     path("webhooks/", include("webhooks.urls")),
     path("dashboard/", include("dashboard.urls")),
     path("api/", include("api.urls")),
+    path("hub/", include("hub.urls")),
     path("healthz/", health_check, name="health_check"),
     path("", home, name="home"),
 ]

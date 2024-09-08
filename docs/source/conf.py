@@ -64,7 +64,6 @@ html_theme_options = {
     "heroes": {
         "index": "Transform your Development Workflow",
     },
-
 }
 html_sidebars = {
     "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]

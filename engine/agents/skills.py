@@ -16,7 +16,9 @@ MAX_TOOL_NAME_LEN = 35
 logger = logging.getLogger(__name__)
 
 
-def build_agent_skill_tool_function(task, project_info, pilot_hints, instructions, skill_title):
+def build_agent_skill_tool_function(
+    task, project_info, pilot_hints, instructions, skill_title
+):
     """Build a function that will be used to create a LangChain tool for the agent skill.
     Args:
         task: Task object
@@ -68,7 +70,9 @@ def build_agent_skill_tool_function(task, project_info, pilot_hints, instruction
             target=skill_title,
             message=executor_result["output"],
         )
-        logger.info(f"Finished skill execution on project {task.github_project}: {skill_title}")
+        logger.info(
+            f"Finished skill execution on project {task.github_project}: {skill_title}"
+        )
         return executor_result["output"]
 
     return agent_skill_tool_function

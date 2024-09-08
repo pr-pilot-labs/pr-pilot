@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillHub - Share and discover PR Pilot skills</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+    <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .bash-shell {
+            color: #ffffff;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title"><i class="fas fa-globe"></i> SkillHub - Discover <span class="has-text-success">{{ skills|length }}</span> Agent Skills</h1>
+            <div class="content">
+                <p>This page is a collection of all public Github projects using <a href="https://www.pr-pilot.ai">PR Pilot</a>. Discover their skills and use them in your own projects!
+                </p>
+                <p>
+                    <b>What's a skill?</b>
+                    Skills are like mini-programs or sub-routines that PR Pilot can be run on your project during tasks or conversations.
+                    The agent will automatically run the skill when you ask it to, populate the arguments with the
+                    necessary content and respond with the result. Find out more about skills in the <a href="https://docs.pr-pilot.ai/user_guide.html#knowledge-and-skills-how-to-train-your-agent">documentation</a>.
+                </p>
+            </div>
+            <div class="columns">
+                <div class="column is-one-quarter">
+                    <aside class="menu">
+                        <p class="menu-label">Projects</p>
+                        <ul class="menu-list" id="project-list">
+                            {% for project in projects %}
+                            <li><a href="#" class="project-link" data-project="{{ project }}">{{ project }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </aside>
+                </div>
+                <div class="column" id="skills-column">
+                    <div class="content bash-shell has-background-dark">
+                        $ pilot grab skills <span id="selected-project-title"></span>
+                        <button class="copy-button" onclick="copyToClipboard()"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div id="skills-container">
+                        {% for skill in skills %}
+                        <div class="card skill-card mb-5" data-project="{{ skill.github_repo.full_name }}">
+                            <header class="card-header  has-background-primary">
+                                <p class="card-header-title has-text-info-light">{{ skill.title }}</p>
+                                <button class="card-header-icon has-text-info-light" aria-label="more options">
+                                    <span class="icon">
+                                        <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                    </span>
+                                </button>
+                            </header>
+                            <div class="card-content">
+                                {%  if skill.arguments %}
+                                    <div class="content">
+                                        <b>Arguments</b>
+                                        <table class="table">
+                                            <tbody>
+                                            {% for arg in skill.arguments.all %}
+                                                <tr>
+                                                    <td><span class="tag is-dark">{{ arg.key }}</span></td>
+                                                    <td>{{ arg.value }}</td>
+                                                </tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
+                                <div class="content">
+                                    <b>Instructions</b>
+                                    {{ skill.instructions }}
+                                </div>
+                                <div class="content">
+                                    <b>Respond with </b> {{ skill.result }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        $(document).ready(function() {
+            $('.skill-card .card-content').hide();
+            $('.skill-card:first .card-content').show();
+
+            $('.card-header').click(function() {
+                $(this).next('.card-content').slideToggle();
+                $(this).find('.icon i').toggleClass('fa-angle-down fa-angle-up');
+            });
+
+            $('.project-link').on('click', function(e) {
+                e.preventDefault();
+                var projectId = $(this).data('project');
+                $('.project-link').removeClass('has-text-weight-bold');
+                $(this).addClass('has-text-weight-bold');
+                $('#selected-project-title').text(projectId);
+                $('.skill-card').hide();
+                $('.skill-card[data-project="' + projectId + '"]').show();
+                $('.skill-card[data-project="' + projectId + '"] .card-content').first().show();
+            });
+
+            // Show the first project by default
+            const firstProject = $('.project-link').first().data('project');
+            $('.project-link').first().addClass('has-text-weight-bold');
+            $('#selected-project-title').text(firstProject);
+            $('.skill-card[data-project="' + firstProject + '"]').show();
+            $('.skill-card[data-project="' + firstProject + '"] .card-content').first().show();
+        });
+
+        function copyToClipboard() {
+            var text = '$ pilot grab skills ' + $('#selected-project-title').text();
+            navigator.clipboard.writeText(text).then(function() {
+                alert('Copied to clipboard');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>
