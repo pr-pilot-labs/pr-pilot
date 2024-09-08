@@ -14,6 +14,8 @@
 
 # Find Sentry error with the most events
 - title: Investigate latest Sentry error
+  args:
+      optional_search_criteria: Optional search criteria
   instructions: |
     Investigate a Sentry error by doing the following:
     1. List all open Sentry issues
