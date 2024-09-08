@@ -12,6 +12,16 @@
     3. Add the path for the new endpoint to `api/urls.py` 
     4. Write tests for the new endpoint in `api/tests/test_api.py`
 
+# Find Sentry error with the most events
+- title: Investigate latest Sentry error
+  instructions: |
+    Investigate a Sentry error by doing the following:
+    1. List all open Sentry issues
+    2. Find the issue that best matches the given description
+    3. Read the three most recent events for the issue
+    4. Write a concise description of the error and relevant technical details (e.g. stack trace)
+  result: A concise description of the error and relevant technical details
+
 # Write a comprehensive bug report, gather information and notify the QA team
 - title: Report a bug
   args:
