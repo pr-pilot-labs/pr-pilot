@@ -52,14 +52,17 @@
                     </aside>
                 </div>
                 <div class="column" id="skills-column">
-                    <div class="content bash-shell has-background-dark">
-                        $ pilot grab skills <span id="selected-project-title"></span>
+                    <div class="content">
+                        To use the skills below in your project, run the following command in your terminal:
+                    </div>
+                    <div class="content bash-shell has-background-dark mb-5">
+                        $ <b>pilot</b> grab skills <span id="selected-project-title"></span>
                         <button class="copy-button" onclick="copyToClipboard()"><i class="fas fa-copy"></i></button>
                     </div>
                     <div id="skills-container">
                         {% for skill in skills %}
                         <div class="card skill-card mb-5" data-project="{{ skill.github_repo.full_name }}">
-                            <header class="card-header  has-background-primary">
+                            <header class="card-header  has-background-info">
                                 <p class="card-header-title has-text-info-light">{{ skill.title }}</p>
                                 <button class="card-header-icon has-text-info-light" aria-label="more options">
                                     <span class="icon">

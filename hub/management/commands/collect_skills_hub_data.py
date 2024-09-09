@@ -1,16 +1,24 @@
 import yaml
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from github import Github, GithubException
 
-from api.models import UserAPIKey
 from engine.agents.skills import AgentSkill
 from hub.models import PilotSkill
-from webhooks.jwt_tools import get_installation_access_token
+from webhooks.jwt_tools import generate_jwt
 from webhooks.models import GithubRepository
 
 
 class Command(BaseCommand):
     help = "Collects .pilot-hints.md, .pilot-commands.yaml, and pilot-skills.yaml from distinct github_project values in Task model"
+
+    def get_repos_with_skills(self):
+        """Search Github for repositories containing the .pilot-skills.yaml file"""
+        jwt_token = generate_jwt(int(settings.GITHUB_APP_ID), settings.PRIVATE_KEY_PATH)
+        github = Github(jwt=jwt_token)
+        query = "filename:.pilot-skills.yaml"
+        result = github.search_code(query)
+        return [item.repository.full_name for item in result]
 
     def scrape_pilot_skills(self, repo: GithubRepository, skills_file_content: str):
         skills = yaml.safe_load(skills_file_content)
@@ -38,20 +46,19 @@ class Command(BaseCommand):
             )
 
     def handle(self, *args, **kwargs):
-        github_projects = UserAPIKey.objects.values_list(
-            "github_project", flat=True
-        ).distinct()
-
+        github_projects = self.get_repos_with_skills()
+        g = Github()
         for project in github_projects:
-            if not project:
-                continue
             try:
-                stored_repo = GithubRepository.objects.get(full_name=project)
-                g = Github(
-                    get_installation_access_token(
-                        stored_repo.installation.installation_id
+                try:
+                    stored_repo = GithubRepository.objects.get(full_name=project)
+                except GithubRepository.DoesNotExist:
+                    self.stdout.write(
+                        self.style.WARNING(
+                            f"Repository {project} not found in database, skipping."
+                        )
                     )
-                )
+                    continue
                 repo = g.get_repo(project)
                 if repo.private:
                     self.stderr.write(

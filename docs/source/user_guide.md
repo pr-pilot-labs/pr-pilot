@@ -377,7 +377,7 @@ How is this helpful?
 * **Tailored & Customizable**: You can customize the skill to fit your team's specific workflow
 
 We also want to make it easy for you to **share skills** with colleagues.
-Discover skills others have shared on [SkillHub](https://app.pr-pilot.ai/hub)!
+Discover skills others have shared on [SkillHub](https://app.pr-pilot.ai/hub/skills/)!
 
 
 ### Configuration
