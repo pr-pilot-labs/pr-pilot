@@ -12,6 +12,13 @@ spec:
           - name: collect-skills-hub-data
             image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
             imagePullPolicy: Always
+            resources:
+              limits:
+                memory: "200Mi"
+                cpu: "1"
+              requests:
+                memory: "100Mi"
+                cpu: "0.1"
             command: ["python", "manage.py", "collect_skills_hub_data"]
             env:
             - name: GITHUB_APP_PRIVATE_KEY_PATH
