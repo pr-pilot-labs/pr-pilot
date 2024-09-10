@@ -5,7 +5,7 @@ from github import Github, GithubException
 
 from engine.agents.skills import AgentSkill
 from hub.models import PilotSkill
-from webhooks.jwt_tools import generate_jwt
+from webhooks.jwt_tools import generate_jwt, get_installation_access_token
 from webhooks.models import GithubRepository
 
 
@@ -47,7 +47,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         github_projects = self.get_repos_with_skills()
-        g = Github()
         for project in github_projects:
             try:
                 try:
@@ -59,6 +58,7 @@ class Command(BaseCommand):
                         )
                     )
                     continue
+                g = Github(get_installation_access_token(stored_repo.installation_id))
                 repo = g.get_repo(project)
                 if repo.private:
                     self.stderr.write(
