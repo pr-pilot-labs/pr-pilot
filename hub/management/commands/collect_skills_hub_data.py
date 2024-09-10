@@ -58,7 +58,11 @@ class Command(BaseCommand):
                         )
                     )
                     continue
-                g = Github(get_installation_access_token(stored_repo.installation_id))
+                g = Github(
+                    get_installation_access_token(
+                        stored_repo.installation.installation_id
+                    )
+                )
                 repo = g.get_repo(project)
                 if repo.private:
                     self.stderr.write(
