@@ -1,0 +1,43 @@
+<div class="card skill-card mb-5" data-project="{{ skill.github_repo.full_name }}">
+    <header class="card-header has-background-info has-text-centered">
+        <p class="card-header-title has-text-info-light has-text-centered has-text-justified">{{ skill.title }}</p>
+        <button class="card-header-icon has-text-info-light" aria-label="more options">
+            <span class="icon">
+                <i class="fas fa-angle-down" aria-hidden="true"></i>
+            </span>
+        </button>
+    </header>
+    <div class="card-content">
+        <div class="is-pulled-right">
+            <a href="https://github.com/{{ skill.github_repo.full_name }}" target="_blank" class="tag is-dark has-text-weight-semibold has-text-secondary">
+                <span class="icon"><i class="fab fa-github"></i></span> {{ skill.github_repo.full_name }}</a>
+        </div>
+        {% if skill.arguments %}
+            <div class="content">
+                <b>Arguments</b>
+                <table class="table">
+                    <tbody>
+                    {% for arg in skill.arguments.all %}
+                        <tr>
+                            <td><span class="tag is-secondary">{{ arg.key }}</span></td>
+                            <td>{{ arg.value }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+        <div class="content">
+            <b>Instructions</b>
+            {{ skill.instructions }}
+        </div>
+        <div class="content">
+            <b>Respond with </b> {{ skill.result }}
+        </div>
+    </div>
+    <footer class="card-footer">
+        <a href="#" class="card-footer-item has-text-info" onclick="downloadSkill('{{ skill.github_repo.full_name }}')"><span class="icon"><i class="fas fa-download"></i></span> Download</a>
+        <a href="#" class="card-footer-item has-text-success" onclick="copyImportCommand('{{ skill.github_repo.full_name }}')"><span class="icon"><i class="fas fa-file-import"></i></span> Import</a>
+        <a href="#" class="card-footer-item has-text-warning" onclick="openYAML('{{ skill.github_repo.full_name }}')"><span class="icon"><i class="fas fa-file-code"></i></span> YAML</a>
+    </footer>
+</div>
