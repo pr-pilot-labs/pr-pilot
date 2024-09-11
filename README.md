@@ -186,6 +186,26 @@ To expose your local server to the internet, you can use `ngrok`:
 ngrok http 8000
 ```
 
+## 🚀 Run with Docker Compose
+
+To run the project using Docker Compose, follow these steps:
+
+1. Set the environment variables listed above in a `.env` file in the root directory of the project.
+2. Run the following command to start the services:
+
+```bash
+docker-compose up --build
+```
+
+This will start the following services:
+
+- **app**: The main application service running Django.
+- **redis**: The Redis service for job scheduling.
+- **postgres**: The PostgreSQL database service.
+- **nginx**: The Nginx service for serving static files.
+
+3. Access the application at `http://localhost:8000`.
+
 ## 🧪 Unit Tests
 
 PR Pilot uses `tox` for managing unit tests. The test setup is configured in the `tox.ini` file, and tests are written using `pytest`.
