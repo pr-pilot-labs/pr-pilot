@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pr-pilot-app:${VERSION}
+    environment:
+      - GITHUB_APP_PRIVATE_KEY_PATH=/etc/ssl/certs/github_private_key.pem
+      - REDIS_HOST=redis
+      - JOB_STRATEGY=${JOB_STRATEGY}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pem-volume:/etc/ssl/certs/github_private_key.pem
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    image: pr-pilot-worker:${VERSION}
+    environment:
+      - GITHUB_APP_PRIVATE_KEY_PATH=/etc/ssl/certs/github_private_key.pem
+      - REDIS_HOST=redis
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - pem-volume:/etc/ssl/certs/github_private_key.pem
+    depends_on:
+      - redis
+      - postgres
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: pr-pilot-static:${VERSION}
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: prpilot
+      POSTGRES_USER: prpilot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  pem-volume:
+    driver: local
+  postgres-data:
+    driver: local
