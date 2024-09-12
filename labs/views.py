@@ -107,6 +107,7 @@ def view_experiment(request, github_user, github_repo, slug):
         elif event.action == "finish_skill":
             indent -= 1
 
+    experiment.task.user_request = render_markdown(experiment.task.user_request)
     if experiment.task.result:
         experiment.task.result = render_markdown(experiment.task.result)
 
@@ -135,6 +136,7 @@ def create_experiment(request, github_user, github_repo):
         knowledge = request.POST.get("knowledge")
         user = g.get_user()
         fork = user.create_fork(repo)
+        fork.edit(has_wiki=True, has_issues=True)
         print(f"Forked repository: {fork.full_name}")
         # Wait for the fork installation to be created
         while not GithubRepository.objects.filter(full_name=fork.full_name).exists():

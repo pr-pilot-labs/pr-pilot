@@ -1,48 +1,63 @@
 {% extends "lab_base.html" %}
 
+{% block main_header %}
+    AE Labs - New Experiment
+
+{% endblock %}
+
 
 {% block top_content %}
     <div class="content">
-        <p class="is-size-5  has-text-weight-light">
-            Create an AI experiment for <b><a href="{{ repo.html_url }}" target="_blank"><span class="icon"><i class="fab fa-github"></i></span> {{ repo.full_name }}</b></a>
-        </p>
-        <p class="p-5 is-size-5 has-text-weight-light">
-            This is an experimental website that lets you <b>instruct an AI agent to run a task</b> on any public Github repository.
-            The agent will use its <a href="https://docs.pr-pilot.ai/capabilities.html" target="_blank">capabilities</a> to fulfill the task autonomously and present you with the results.
+        <p class=" is-size-5 has-text-weight-light">
+            <b>Instruct an <a href="https://www.pr-pilot.ai" target="_blank">AI developer assistant</a> to fulfill a task on <a href="{{ repo.html_url }}" target="_blank"><span class="icon is-small"><i class="fab fa-github"></i></span> {{ repo.full_name }}</b></a>.
+            The agent will fork the repo, use its own <a href="https://docs.pr-pilot.ai/capabilities.html" target="_blank">capabilities</a> to fulfill the task autonomously and present you with the results.
         </p>
     </div>
 {% endblock %}
 
 {% block content %}
     <div class="content">
-        <form method="post">
+        <form method="post" action="/labs/{{ repo.full_name }}/new/">
             {% csrf_token %}
 
             <div class="field has-text-weight-normal">
-                <p class="is-size-5">
-                    <b class="has-text-info">Describe what you want</b> the agent to do and what the expected result of the experiment is.
-                </p>
-                <div class="control">
-                    <textarea name="instructions"
-                              id="instructions"
-                              class="textarea is-medium is-info"
-                              placeholder="Find and read a few important files and give me a concise overview of what you found.">{{ instructions }}</textarea>
+                <div class="columns">
+                    <div class="column is-one-third">
+                        <p class="is-size-5">
+                            <b class="has-text-info">Describe the task to the agent</b> and what you expect as a result.
+                        </p>
+                    </div>
+                    <div class="column">
+                        <div class="control">
+                            <textarea name="instructions"
+                                      id="instructions"
+                                      class="textarea is-medium is-info"
+                                      placeholder="Find and read a few important files and give me a concise overview of what you found.">{{ instructions }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="field has-text-weight-normal">
+                <div class="columns">
+                    <div class="column is-one-third">
+                        <p class="is-size-5">
+                            <b class="has-text-primary">Describe what the agent needs to know</b> about your project
+                            to fulfill the task correctly.
+                        </p>
+                    </div>
+                    <div class="column">
+                        <div class="control">
+                            <textarea name="knowledge" id="knowledge" class="textarea is-medium is-primary"
+                                      placeholder="The README.md describes most of the project. User docs are in docs/">{{ knowledge }}</textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <div class="field has-text-weight-normal">
                 <p class="is-size-5">
-                    Describe what <b class="has-text-primary">the agent needs to know</b> about your project to fulfill the task
-                </p>
-                <div class="control">
-                    <textarea name="knowledge" id="knowledge" class="textarea is-medium is-primary"
-                              placeholder="The README.md describes most of the project. User docs are in docs/">{{ knowledge }}</textarea>
-                </div>
-            </div>
-
-            <div class="field has-text-weight-normal">
-                <p class="is-size-5">
-                    Now, let the agent <b>get to work</b> and see what happens!
+                    Now, <b>let the agent get to work</b>!
                 </p>
             </div>
 

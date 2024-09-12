@@ -44,6 +44,15 @@
             top: 0;
             right: 0;
         }
+        .is-blinking {
+            animation: blinkAnimation 2s infinite;
+        }
+
+        @keyframes blinkAnimation {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
     </style>
     <script>
         $(document).ready(function() {
@@ -59,10 +68,10 @@
                 <div class="content">
 
                     <p class="is-size-5">
-                        <b>Arcane Engineering</b> is on a mission to make <b>developers</b> more productive.
+                        <b><a href="https://arcane.engineer" target="_blank">Arcane Engineering</a></b> is on a mission to make <b>developers</b> more productive.
 
                     </p>
-                    <p class="is-size-5">Run <a href="https://www.pr-pilot.ai">our technology</a> on any public Github repo in your browser:
+                    <p class="is-size-5">To get a feel for it, you can run our <a href="https://www.pr-pilot.ai" target="_blank">AI assistant for developers</a> on any public Github repo in your browser:
                     </p>
 
                 </div>

@@ -6,10 +6,8 @@
             <input class="input is-large" type="text" placeholder="owner / repo" id="repo-input">
         </div>
         <div class="control mr-5">
-            <button class="button is-info is-large" onclick="location.href='/labs/' + document.getElementById('repo-input').value + '/new/'">
-                <span class="icon">
-                    <i class="fas fa-plus-circle "></i>
-                </span>
+            <button class="button is-info is-large is-dark" onclick="location.href='/labs/' + document.getElementById('repo-input').value + '/new/'">
+                Let's Experiment
             </button>
         </div>
 
@@ -17,8 +15,8 @@
     <!-- Render experiments as table -->
     <div class="content has-text-centered">
         <h4>Latest Experiments</h4>
-    <p>
-        See what other developers have played around with recently.
+    <p class="is-size-4 has-text-weight-light">
+        This is first and foremost a Playground! All experiments are public and anonymous.
     </p>
     </div>
     <div class="table-container">
@@ -31,7 +29,7 @@
                         <a href="https://github.com/{{ experiment.task.github_project }}" target="_blank" class="button is-small">
                             <span class="icon"><i class="fab fa-github"></i></span>
                         </a>
-                        <a href="/labs/{{ experiment.task.github_project }}/new/" class="button is-info is-small">
+                        <a href="/labs/{{ experiment.task.github_project }}/new/" class="button is-primary is-small is-dark">
                             <span class="icon"><i class="fas fa-plus"></i></span>
                         </a>
                     </td>

@@ -1,51 +1,87 @@
 {% extends "lab_base.html" %}
 
-{% block main_header %}AE Labs Experiment <a href="/labs/" class="button is-success is-dark is-pulled-right">
-    <span class="icon"><i class="fas fa-plus"></i></span>
-</a>{% endblock %}
+{% block main_header %}
+    AE Labs Experiment <a href="/labs/" class="button is-success is-dark is-pulled-right"><span class="icon"><i class="fas fa-plus"></i></span></a>
+
+{% endblock %}
 
 {% block top_content %}
-    <div class="content">
-        <p class="is-size-5">
-
-        </p>
+    <div class="p-5 is-size-2 has-text-weight-light has-text-centered is-spaced title">
+        {% if experiment.task.status == "failed" %}
+            <span class="icon has-text-danger"><i class="fa fa-times"></i></span>
+        {% elif experiment.task.status == "completed" %}
+            <span class="icon has-text-success"><i class="fa fa-check"></i></span>
+        {% elif experiment.task.status == "running" %}
+            <span class="icon has-text-info is-size-3"><i class="fa fa-rotate fa-spin"></i></span>
+        {% endif %}
+        <span>{{ experiment.name }}</span>
     </div>
     <div class="content">
-        <h3 class="title">
+        <div class="is-centered buttons">
             <a href="{{ repo.html_url }}" target="_blank" class="button is-medium">
                 <span class="icon is-small"><i class="fab fa-github"></i></span>
                 <span>{{ repo.full_name }}</span>
             </a>
-        </h3>
+            {% if experiment.task.status == "completed" %}
+            <!-- Buttons for sharing on social media -->
+            <a href="https://twitter.com/intent/tweet?text={{ experiment.name|urlencode }}%0A%0A%23ArcaneEngineering%20%23AI%20%23Automation%20%23Productivity%0A%0A{{ request.build_absolute_uri }}" target="_blank" class="button is-info is-dark">
+                <span class="icon is-small"><i class="fab fa-twitter"></i></span> <span>Tweet</span>
+            </a>
+            <a href="#" target="_blank" class="button is-info is-dark" id="linkedin-link">
+                <span class="icon is-small"><i class="fab fa-linkedin"></i></span> <span>Share</span>
+            </a>
+            {% endif %}
+            <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" target="_blank" class="button is-success is-dark">
+                <span class="icon is-small"><i class="fa fa-copy"></i></span> <span>Replicate Experiment</span>
+            </a>
+            {% if experiment.task.pr_number %}
+                <a href="{{ repo.html_url }}/pull/{{ experiment.task.pr_number }}/files" target="_blank" class="button is-dark">
+                    <span class="icon is-small"><i class="fab fa-github"></i></span> <span>View File Changes</span>
+                </a>
+
+            {% endif %}
+
+
+        </div>
 
     </div>
 {% endblock %}
 
 {% block content %}
+
     <div class="columns">
         <div class="column">
             <p class="is-size-5 has-text-weight-light p-5">
-                A set of <b class="">instructions</b> were given to an <a href="https://www.pr-pilot.ai" target="_blank">AI Agent</a> and to run on the codebase.
+
+                A set of <span class="icon has-text-info is-small"><i class="fas fa-clipboard"></i></span> <b class="">instructions</b> were given to an <a href="https://www.pr-pilot.ai" target="_blank">AI Agent</a> and to run on the codebase.
             </p>
-            <div class="m-2 box has-background-white-bis">
-                <span class="icon has-text-info"><i class="fas fa-clipboard"></i></span> {{ experiment.task.user_request }}
+            <div class="m-2 box has-background-info-light content">
+                {{ experiment.task.user_request }}
             </div>
         </div>
         <div class="column">
             <p class="is-size-5 has-text-weight-light p-5">
-                Additional <b>knowledge</b> about the codebase is provided to improve the results
+
+                Additional <span class="icon has-text-primary is-small"><i class="fas fa-brain"></i></span> <b>knowledge</b> about the codebase was provided to improve the results
                 <a href="https://docs.pr-pilot.ai/user_guide.html#knowledge-and-skills-how-to-train-your-agent" target="_blank">
                 <span class="icon has-text-info-light">
                     <i class="fas fa-question-circle"></i>
                   </span></a>
             </p>
-            <div class="m-2 box has-background-white-bis">
-                <span class="icon has-text-primary"><i class="fas fa-brain"></i></span> {{ experiment.knowledge }}
-            </div>
+            {%  if experiment.knowledge %}
+                <div class="m-2 box has-background-primary-light content">
+                    {{ experiment.knowledge }}
+                </div>
+            {% else %}
+                <div class="m-2 box has-background-primary-light content has-text-weight-light">
+                    No additional knowledge provided.
+                </div>
+            {% endif %}
+
         </div>
     </div>
     <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
-        The agent used its
+        The agent {% if experiment.task.status == "running" %}is using{% else %}used{% endif %} its
         <a href="https://docs.pr-pilot.ai/capabilities.html">capabilities</a> to autonomously fulfill the request:
     </div>
 
@@ -58,9 +94,9 @@
                 <tbody>
                 {% for event in task_events %}
                     <tr class="{% if not event.indent %}has-background-white-bis{% else %}has-background-white-ter has-text-weight-light{% endif %}">
-                        <td>
+                        <td class="has-text-weight-light">
                             {% if not event.indent %}
-                            <span class="icon has-text-light"><i class="fa fa-clock"></i></span> {{ event.seconds_since_start }}s</td>
+                            {{ event.seconds_since_start }}</td>
                             {% endif %}
                         <td>
                             {% if event.indent %}
@@ -81,9 +117,9 @@
                 {% endfor %}
                 {%  if experiment.task.status == "running" %}
                     <tr class="has-background-white-bis">
-                        <td><span class="icon"><i class="fa fa-clock"></i></span> <span id="second-counter"></span>s</td>
-                        <td><progress class="progress is-secondary is-small" max="100">15%</progress></td>
-                        <td class="has-text-secondary is-blinking">Running experiment ...</td>
+                        <td><span id="second-counter" class="has-text-weight-light"></span></td>
+                        <td><progress class="progress is-secondary is-small mt-2" max="100">15%</progress></td>
+                        <td class="is-family-monospace is-blinking">{{ experiment.name }}</td>
                     </tr>
                 {% endif %}
                 </tbody>
@@ -91,44 +127,45 @@
         </div>
 
     </div>
-    <hr class="m-5">
+
+
+
     {%  if experiment.task.status == "completed" %}
-    <div class="is-size-2 has-text-weight-light has-text-centered is-spaced title">
-        <span class="icon has-text-success"><i class="fa fa-check"></i></span> {{ experiment.name }}
-    </div>
-    <div class="is-centered buttons">
-        <!-- Buttons for sharing on social media -->
-        <a href="https://twitter.com/intent/tweet?text={{ experiment.name|urlencode }}%0A%0A%23ArcaneEngineering%20%23AI%20%23Automation%20%23Productivity%0A%0A{{ request.build_absolute_uri }}" target="_blank" class="button is-info is-dark">
-            <span class="icon is-small"><i class="fab fa-twitter"></i></span> <span>Tweet</span>
-        </a>
-        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_url }}&title=I%20just%20ran%20an%20AI%20experiment%20on%20{{ repo.full_name }}%20and%20got%20{{ experiment.task.result }}%20%23AELabs%20%23AI%20%23ML%20%23DL" target="_blank" class="button is-info is-dark">
-            <span class="icon is-small"><i class="fab fa-linkedin"></i></span> <span>Share</span>
-        </a>
-        <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" target="_blank" class="button is-success is-dark">
-            <span class="icon is-small"><i class="fa fa-copy"></i></span> <span>Copy Experiment</span>
-        </a>
-        {% if experiment.task.pr_number %}
-        <a href="{{ repo.html_url }}/pull/{{ experiment.task.pr_number }}/files" target="_blank" class="button is-dark">
-            <span class="icon is-small"><i class="fab fa-github"></i></span> <span>View File Changes</span>
-        </a>
-
-        {% endif %}
-
+    <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
+        The agent <b class="has-text-success">{{ experiment.task.status }}</b> the task and responded:
     </div>
     <div class="box content has-background-success-light">
         {{ experiment.task.result }}
     </div>
     {% endif %}
 
-    <hr class="m-5">
+    {% if experiment.task.status == "failed" %}
+    <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
+        The agent <b class="has-text-danger">{{ experiment.task.status }}</b> the task and responded:
+    </div>
+    <div class="box content has-background-danger-light">
+        {{ experiment.task.result }}
+    </div>
+        <div class="content has-text-centered">
+            <a href="/labs/{{ repo.full_name }}/new/" class="button is-success is-dark is-large">Start Over</a>
+        </div>
 
-    <div class="content has-text-centered is-size-4">
-        To use this technology in your own projects, follow our <a href="https://docs.pr-pilot.ai/" target="_blank">Quick Start Guide</a>.
+
+    {% endif %}
+
+
+    <div class="content has-text-centered is-size-4 p-5">
+        Automate your own projects in no time using our <a href="https://docs.pr-pilot.ai/" target="_blank">Quick Start Guide</a>.
     </div>
 
     <script>
         $(document).ready(function() {
-        // Open websocket to get task updates
+
+        const url_encoded_current_url = encodeURIComponent(window.location.href);
+
+        $('#linkedin-link').attr('href', `https://www.linkedin.com/shareArticle?mini=true&summary={{ experiment.name|urlencode }}&url=${url_encoded_current_url}`);
+
+            // Open websocket to get task updates
         const task = {
             id: "{{ experiment.task.id }}",
             status: "{{ experiment.task.status }}"
@@ -145,18 +182,17 @@
             },
             {% endfor %}
         ];
-
+        let counter = 0;
         {% if experiment.task.status == "running" %}
             // Count up timer and set value in #second-counter
             const lastEvent = taskEvents[taskEvents.length - 1];
-            let counter = 0;
+
             if (lastEvent) {
                 counter = lastEvent.seconds_since_start;
             }
             function countUp() {
                 counter++;
                 $("#second-counter").text(counter);
-                console.log(counter);
             }
             setInterval(countUp, 1000);
         {% endif %}
@@ -187,12 +223,12 @@
                 if (msgType === "event") {
                     const event = data['data'];
                     taskEvents.push(event);
-                    event.icon = ACTION_FA_ICON_MAP[event.action];
+                    event.icon = ACTION_FA_ICON_MAP[event.action] || "check";
                     const converter = new showdown.Converter();
                     const htmlMessage = converter.makeHtml(event.message);
                     $('.table tbody').append(`
                         <tr class="has-background-white-bis">
-                            <td><span class="icon"><i class="fa fa-clock"></i></span> ${counter} s</td>
+                            <td class="has-text-weight-light">${counter}</td>
                             <td><span class="icon"><i class="fa fa-${event.icon}"></i></span></td>
                             <td>${htmlMessage}</td>
                         </tr>
