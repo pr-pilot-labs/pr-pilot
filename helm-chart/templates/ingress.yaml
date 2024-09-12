@@ -7,7 +7,7 @@ metadata:
     networking.gke.io/managed-certificates: app-pr-pilot-certificate
 spec:
   rules:
-  - host: app.pr-pilot.ai
+  - host: labs.pr-pilot.ai
     http:
       paths:
       - path: /static/
