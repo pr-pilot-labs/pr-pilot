@@ -79,3 +79,7 @@ daily-report:
 
 redis-docker:
 	docker run -d -p 6379:6379 redis
+
+# Run an iripgrep search in the docker container on a known file
+rg-test:
+	docker run -v $(PWD)/iripgrep:/iripgrep -it --rm --entrypoint /bin/bash $(WORKER_IMAGE_NAME):$(VERSION) -c "rg 'class Experiment' --glob '**/*.py'"

@@ -1,5 +1,4 @@
 import logging
-import os
 import shlex
 import subprocess
 from pathlib import Path
@@ -272,12 +271,8 @@ def search_for_code_snippets(search_regex: str, glob: str) -> str:
     Note:
         - Do NOT use file names in the `search_regex` parameter. Use the `glob` parameter to limit the search to specific files.
     """
-    search_path = os.path.join(settings.REPO_DIR, glob)
-    command = f"rg -n {shlex.quote(search_regex)} {str(search_path)}"
-    TaskEvent.add(
-        actor="assistant",
-        action="search_code",
-        message=f"Searching code for pattern: `{search_regex}` in `{glob}`.",
+    command = (
+        f"rg {shlex.quote(search_regex)} --glob {shlex.quote(glob)} {settings.REPO_DIR}"
     )
     try:
         result = subprocess.run(
@@ -288,14 +283,38 @@ def search_for_code_snippets(search_regex: str, glob: str) -> str:
         )
         if result.returncode == 0:
             if not result.stdout:
+                TaskEvent.add(
+                    actor="assistant",
+                    action="search_code",
+                    message=f"Searching code for pattern: `{search_regex}` in `{glob}`. No results.",
+                )
                 return f"No matches found for pattern `{search_regex}` in `{glob}`."
             result = result.stdout.strip()
             root_path_replaced = result.replace(str(settings.REPO_DIR), "")
             max_100_lines = root_path_replaced.split("\n")[:150]
-            return "\n".join(max_100_lines)
+            return "\n".join(max_100_lines) + "\n\n[...] (truncated too many results)"
+        elif result.returncode == 1 and not result.stderr:
+            TaskEvent.add(
+                actor="assistant",
+                action="search_code",
+                message=f"Searching code for pattern: `{search_regex}` in `{glob}`. No results.",
+            )
+            return f"No matches found for pattern `{search_regex}` in `{glob}`."
         else:
+            TaskEvent.add(
+                actor="assistant",
+                action="search_code",
+                message=f"An Error occurred searching code for pattern: `{search_regex}` in `{glob}`: {result.stderr}",
+            )
+            logger.error(f"An error occurred while running ripgrep: {result.stderr}")
             return "An error occurred." + result.stderr
     except Exception as e:
+        logger.error(f"An error occurred while running ripgrep: {e}")
+        TaskEvent.add(
+            actor="assistant",
+            action="search_code",
+            message=f"An Error occurred searching code for pattern: `{search_regex}` in `{glob}`: {e}",
+        )
         return f"An error occurred while running ripgrep: {e}"
 
 
