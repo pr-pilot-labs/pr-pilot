@@ -19,4 +19,5 @@ urlpatterns = [
     ),
     path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("resolve-pr/", views.get_pr_number, name="resolve_pr"),
+    path("experiments/", views.ExperimentListView.as_view(), name="experiment_list"),
 ]
