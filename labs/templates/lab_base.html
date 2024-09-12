@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+
+    <!-- Meta tags -->
+    <meta name="description" content="Arcane Engineering Labs">
+    <meta name="keywords" content="Arcane Engineering, AI, Machine Learning, Developer Tools, Productivity">
+    <meta name="author" content="Arcane Engineering">
+
+    <!-- Social media tags -->
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="Arcane Engineering Labs">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+    <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css"
+    >
+    <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.0/showdown.min.js"></script>
+    <style>
+        .bash-shell {
+            color: #ffffff;
+            font-family: monospace;
+            padding: 10px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+        }
+        .top-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+        });
+    </script>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title"><a href="/labs/"><i class="fas fa-flask"></i></a> {% block main_header %}AE Labs{% endblock %}</h1>
+
+            {% block top_content %}
+                <div class="content">
+
+                    <p class="is-size-5">
+                        <b>Arcane Engineering</b> is on a mission to make <b>developers</b> more productive.
+
+                    </p>
+                    <p class="is-size-5">Run <a href="https://www.pr-pilot.ai">our technology</a> on any public Github repo in your browser:
+                    </p>
+
+                </div>
+            {% endblock %}
+
+
+            {% block content %}{% endblock %}
+        </div>
+    </section>
+    <footer class="footer">
+        <div class="content has-text-centered">
+            <p>
+                Made with <span class="icon has-text-danger"><i class="fa fa-heart"></i> </span> by <a href="https://arcane.engineer">Arcane Engineering</a>.
+                All rights reserved.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

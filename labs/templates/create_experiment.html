@@ -1,0 +1,69 @@
+{% extends "lab_base.html" %}
+
+
+{% block top_content %}
+    <div class="content">
+        <p class="is-size-5  has-text-weight-light">
+            Create an AI experiment for <b><a href="{{ repo.html_url }}" target="_blank"><span class="icon"><i class="fab fa-github"></i></span> {{ repo.full_name }}</b></a>
+        </p>
+        <p class="p-5 is-size-5 has-text-weight-light">
+            This is an experimental website that lets you <b>instruct an AI agent to run a task</b> on any public Github repository.
+            The agent will use its <a href="https://docs.pr-pilot.ai/capabilities.html" target="_blank">capabilities</a> to fulfill the task autonomously and present you with the results.
+        </p>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="field has-text-weight-normal">
+                <p class="is-size-5">
+                    <b class="has-text-info">Describe what you want</b> the agent to do and what the expected result of the experiment is.
+                </p>
+                <div class="control">
+                    <textarea name="instructions"
+                              id="instructions"
+                              class="textarea is-medium is-info"
+                              placeholder="Find and read a few important files and give me a concise overview of what you found.">{{ instructions }}</textarea>
+                </div>
+            </div>
+
+            <div class="field has-text-weight-normal">
+                <p class="is-size-5">
+                    Describe what <b class="has-text-primary">the agent needs to know</b> about your project to fulfill the task
+                </p>
+                <div class="control">
+                    <textarea name="knowledge" id="knowledge" class="textarea is-medium is-primary"
+                              placeholder="The README.md describes most of the project. User docs are in docs/">{{ knowledge }}</textarea>
+                </div>
+            </div>
+
+            <div class="field has-text-weight-normal">
+                <p class="is-size-5">
+                    Now, let the agent <b>get to work</b> and see what happens!
+                </p>
+            </div>
+
+            <div class="field">
+                <button class="button is-success is-large has-text-weight-light" type="submit">
+                    Fork repo and run instructions
+                </button>
+                <div class="is-size-7">
+                    * All forks are created by <a href="https://github.com/pr-pilot-labs" target="_blank">pr-pilot-labs</a>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+    <script>
+        $(document).ready(function() {
+            // When the fork button is clicked, disable it and turn the text into "Preparing Experiment ..."
+            $('form').submit(function() {
+                $('button').addClass('is-loading').text('Preparing Experiment ...');
+            });
+        });
+    </script>
+{% endblock %}

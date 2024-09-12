@@ -41,6 +41,7 @@ urlpatterns = [
     path("dashboard/", include("dashboard.urls")),
     path("api/", include("api.urls")),
     path("hub/", include("hub.urls")),
+    path("labs/", include("labs.urls")),
     path("healthz/", health_check, name="health_check"),
     path("", home, name="home"),
 ]

@@ -98,8 +98,9 @@ class AgentSkill(BaseModel):
         if self.result:
             final_instructions += f"\n\nRespond with: {self.result}"
         fields = {}
-        for key, value in self.args.items():
-            fields[key.replace(" ", "-")] = (str, FieldInfo(title=value))
+        if self.args:
+            for key, value in self.args.items():
+                fields[key.replace(" ", "-")] = (str, FieldInfo(title=value))
         AgentSkillToolSchema = create_model("AgentSkillToolSchema", **fields)
 
         return StructuredTool(

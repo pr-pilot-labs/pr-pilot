@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "channels",
     "api",
     "hub",
+    "labs",
 ]
 
 MIDDLEWARE = [
@@ -347,3 +348,4 @@ CHANNEL_LAYERS = {
 }
 
 ASGI_APPLICATION = "prpilot.asgi.application"
+LABS_GITHUB_TOKEN = os.getenv("LABS_GITHUB_TOKEN")

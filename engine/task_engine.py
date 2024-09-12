@@ -126,7 +126,7 @@ class TaskEngine:
             },
         )
 
-    def run(self) -> str:
+    def run(self, additional_knowledge=None, overwrite_pilot_skills=[]) -> str:
         self.task.status = "running"
         self.broadcast_status_update("running")
         self.task.save()
@@ -190,7 +190,11 @@ class TaskEngine:
             date_and_time = (
                 timezone.now().isoformat() + " " + str(timezone.get_current_timezone())
             )
-            pilot_skills = self.project.load_pilot_skills(self.task, project_info)
+            pilot_skills = (
+                overwrite_pilot_skills
+                if overwrite_pilot_skills
+                else self.project.load_pilot_skills(self.task, project_info)
+            )
             executor = create_pr_pilot_agent(
                 self.task.gpt_model,
                 image_support=self.task.image is not None,
@@ -212,7 +216,11 @@ class TaskEngine:
                     "user_request": self.task.user_request,
                     "github_project": self.task.github_project,
                     "project_info": project_info,
-                    "pilot_hints": self.project.load_pilot_hints(),
+                    "pilot_hints": (
+                        self.project.load_pilot_hints() + f"\n\n{additional_knowledge}"
+                        if additional_knowledge
+                        else ""
+                    ),
                     "current_time": date_and_time,
                     "custom_skills": custom_skills,
                 }

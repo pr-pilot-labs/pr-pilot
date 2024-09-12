@@ -1,0 +1,56 @@
+{% extends "lab_base.html" %}
+
+{% block content %}
+    <div class="field has-addons p-5">
+        <div class="control is-expanded ml-5">
+            <input class="input is-large" type="text" placeholder="owner / repo" id="repo-input">
+        </div>
+        <div class="control mr-5">
+            <button class="button is-info is-large" onclick="location.href='/labs/' + document.getElementById('repo-input').value + '/new/'">
+                <span class="icon">
+                    <i class="fas fa-plus-circle "></i>
+                </span>
+            </button>
+        </div>
+
+    </div>
+    <!-- Render experiments as table -->
+    <div class="content has-text-centered">
+        <h4>Latest Experiments</h4>
+    <p>
+        See what other developers have played around with recently.
+    </p>
+    </div>
+    <div class="table-container">
+        <table class="table is-fullwidth">
+            <tbody>
+            {% for experiment in experiments %}
+                <tr>
+                    <td class="has-text-weight-light">{{ experiment.created_at | date }}</td>
+                    <td>
+                        <a href="https://github.com/{{ experiment.task.github_project }}" target="_blank" class="button is-small">
+                            <span class="icon"><i class="fab fa-github"></i></span>
+                        </a>
+                        <a href="/labs/{{ experiment.task.github_project }}/new/" class="button is-info is-small">
+                            <span class="icon"><i class="fas fa-plus"></i></span>
+                        </a>
+                    </td>
+                    <td>{{ experiment.task.github_project }}</td>
+                    <td class="has-text-weight-light"><a href="/labs/{{ experiment.task.github_project }}/{{ experiment.slug }}/">{{ experiment.name }}</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#repo-input').focus();
+            // React to enter button
+            $('#repo-input').keypress(function(e) {
+                if (e.which === 13) {
+                    location.href = '/labs/' + document.getElementById('repo-input').value + '/new/';
+                }
+            });
+        });
+    </script>
+{% endblock %}
