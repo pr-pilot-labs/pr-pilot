@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: pr-pilot-app:latest
+    environment:
+      GITHUB_APP_CLIENT_ID: ${GITHUB_APP_CLIENT_ID}
+      GITHUB_APP_SECRET: ${GITHUB_APP_SECRET}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPO_DIR: /repo
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      JOB_STRATEGY: ${JOB_STRATEGY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REPO_CACHE_DIR: /repo_cache
+      SLACK_APP_ID: ${SLACK_APP_ID}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: prpilot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: pr-pilot-static:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+volumes:
+  postgres_data:
