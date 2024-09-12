@@ -198,8 +198,8 @@
         {% endif %}
 
         const ACTION_FA_ICON_MAP = {
-            "invoke_skill": "play has-text-success",
-            "finish_skill": "stop has-text-danger",
+            "invoke_skill": "forward",
+            "finish_skill": "backward",
             "push_branch": "code-branch",
             "checkout_branch": "code-branch",
             "write_file": "edit",
@@ -212,6 +212,7 @@
             "read_files": "file-alt",
         }
 
+        {% if experiment.task.status == "running" %}
 
         function connectWebSocket() {
             const ws = new WebSocket("wss://{{ request.get_host }}/ws/tasks/{{ experiment.task.id }}/events/");
@@ -260,7 +261,7 @@
 
         // Initiate the WebSocket connection
         connectWebSocket();
-
+        {% endif %}
         });
     </script>
 {% endblock %}
