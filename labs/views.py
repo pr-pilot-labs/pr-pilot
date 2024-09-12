@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from github import Github, GithubException
 
 from engine.models.task import Task
+from engine.task_scheduler import SchedulerError
 from engine.util import slugify
 from labs.generate_title import generate_experiment_title
 from labs.models import Experiment
@@ -163,7 +164,10 @@ def create_experiment(request, github_user, github_repo):
         experiment = Experiment.objects.create(
             name=title, slug=slug, knowledge=knowledge, task=task
         )
-        task.schedule()
+        try:
+            task.schedule()
+        except SchedulerError as e:
+            return render(request, "error.html", {"error": e})
 
         return redirect(
             "experiment_view",
