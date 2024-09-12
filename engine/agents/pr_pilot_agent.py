@@ -136,9 +136,7 @@ def move_file(source: str, destination: str):
 
 
 @tool
-def write_file(
-    path: str, complete_entire_file_content: str, commit_message: Optional[str]
-):
+def write_file(path: str, complete_entire_file_content: str, commit_message: str):
     """Write content to a file.
     :param path: Path to the file
     :param complete_entire_file_content: Complete content of the file. NEVER use placeholders or partial content.
@@ -271,14 +269,13 @@ def search_for_code_snippets(search_regex: str, glob: str) -> str:
     Note:
         - Do NOT use file names in the `search_regex` parameter. Use the `glob` parameter to limit the search to specific files.
     """
-    command = (
-        f"rg {shlex.quote(search_regex)} --glob {shlex.quote(glob)} {settings.REPO_DIR}"
-    )
+    command = f"rg {shlex.quote(search_regex)} --glob {glob} {settings.REPO_DIR}"
     try:
         result = subprocess.run(
-            shlex.split(command),
+            command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
+            shell=True,
             text=True,
         )
         if result.returncode == 0:

@@ -82,4 +82,4 @@ redis-docker:
 
 # Run an iripgrep search in the docker container on a known file
 rg-test:
-	docker run -v $(PWD)/iripgrep:/iripgrep -it --rm --entrypoint /bin/bash $(WORKER_IMAGE_NAME):$(VERSION) -c "rg 'class Experiment' --glob '**/*.py'"
+	docker run -v $(PWD):/app -it --rm --entrypoint /bin/bash $(WORKER_IMAGE_NAME):$(VERSION) -c "rg 'class Experiment' --glob '**/*.py' /app"

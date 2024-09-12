@@ -31,7 +31,7 @@
                 <span class="icon is-small"><i class="fab fa-linkedin"></i></span> <span>Share</span>
             </a>
             {% endif %}
-            <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" target="_blank" class="button is-success is-dark">
+            <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" class="button is-success is-dark">
                 <span class="icon is-small"><i class="fa fa-copy"></i></span> <span>Replicate Experiment</span>
             </a>
             {% if experiment.task.pr_number %}
@@ -213,13 +213,17 @@
         }
 
 
-        const ws = new WebSocket("wss://{{ request.get_host }}/ws/tasks/{{ experiment.task.id }}/events/");
+        function connectWebSocket() {
+            const ws = new WebSocket("wss://{{ request.get_host }}/ws/tasks/{{ experiment.task.id }}/events/");
+
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 const msgType = data['type'];
+
                 if (msgType === "status_update") {
                     window.location.reload();
                 }
+
                 if (msgType === "event") {
                     const event = data['data'];
                     taskEvents.push(event);
@@ -227,21 +231,36 @@
                     const converter = new showdown.Converter();
                     const htmlMessage = converter.makeHtml(event.message);
                     $('.table tbody').append(`
-                        <tr class="has-background-white-bis">
-                            <td class="has-text-weight-light">${counter}</td>
-                            <td><span class="icon"><i class="fa fa-${event.icon}"></i></span></td>
-                            <td>${htmlMessage}</td>
-                        </tr>
-                    `);
+            <tr class="has-background-white-bis">
+                <td class="has-text-weight-light">${counter}</td>
+                <td><span class="icon"><i class="fa fa-${event.icon}"></i></span></td>
+                <td>${htmlMessage}</td>
+            </tr>
+        `);
 
                     // Swap the last and second to last row in the table
                     const lastRow = $('.table tbody tr:last');
                     const secondLastRow = $('.table tbody tr:nth-last-child(2)');
                     lastRow.insertBefore(secondLastRow);
-
                 }
+
                 console.log(data);
             };
+
+            ws.onclose = function() {
+                console.log('WebSocket closed. Reconnecting in 1 second...');
+                setTimeout(connectWebSocket, 1000); // Try to reconnect after 1 seconds
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                ws.close(); // Close the WebSocket to trigger the reconnect
+            };
+        }
+
+        // Initiate the WebSocket connection
+        connectWebSocket();
+
         });
     </script>
 {% endblock %}
