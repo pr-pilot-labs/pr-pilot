@@ -19,6 +19,7 @@ class GithubRepository(models.Model):
         "GitHubAppInstallation", on_delete=models.CASCADE, related_name="repositories"
     )
     knowledge = models.TextField(null=True, blank=True)
+    skills_file_hash = models.CharField(max_length=255, null=True, blank=True)
 
 
 class GitHubAppInstallation(models.Model):

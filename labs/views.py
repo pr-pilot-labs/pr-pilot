@@ -8,6 +8,7 @@ from github import Github, GithubException
 from engine.models.task import Task
 from engine.task_scheduler import SchedulerError
 from engine.util import slugify
+from hub.models import PilotSkill
 from labs.generate_title import generate_experiment_title
 from labs.models import Experiment
 from prpilot import settings
@@ -39,11 +40,8 @@ def render_markdown(markdown_text):
 
 
 def root(request):
-    existing_experiments = Experiment.objects.all()
-    # Sorted by date created
-    existing_experiments = sorted(
-        existing_experiments, key=lambda x: x.created_at, reverse=True
-    )
+
+    existing_experiments = Experiment.objects.order_by("-created_at").all()[:20]
     return render(
         request,
         "lab_root.html",
@@ -112,12 +110,17 @@ def view_experiment(request, github_user, github_repo, slug):
     if experiment.task.result:
         experiment.task.result = render_markdown(experiment.task.result)
 
+    skills = list(experiment.skills.all())
+    for skill in skills:
+        skill.instructions = render_markdown(skill.instructions)
+
     return render(
         request,
         "view_experiment.html",
         {
             "repo": repo,
             "experiment": experiment,
+            "skills": skills,
             "task_events": task_events,
             "icon_for_action": icon_for_action,
             "title": f"AE Labs - {experiment.name}",
@@ -135,6 +138,7 @@ def create_experiment(request, github_user, github_repo):
     if request.method == "POST":
         instructions = request.POST.get("instructions")
         knowledge = request.POST.get("knowledge")
+        skill_ids = request.POST.get("selected_skill_ids").split(",")
         user = g.get_user()
         fork = user.create_fork(repo)
         fork.edit(has_wiki=True, has_issues=True)
@@ -164,6 +168,8 @@ def create_experiment(request, github_user, github_repo):
         experiment = Experiment.objects.create(
             name=title, slug=slug, knowledge=knowledge, task=task
         )
+        experiment.skills.set(PilotSkill.objects.filter(id__in=skill_ids).all())
+        experiment.save()
         try:
             task.schedule()
         except SchedulerError as e:
@@ -176,9 +182,28 @@ def create_experiment(request, github_user, github_repo):
             slug=experiment.slug,
         )
     elif request.method == "GET":
+        og_repo = repo.source.full_name
+        core_skills = PilotSkill.objects.filter(
+            github_repo__full_name="PR-Pilot-AI/core"
+        ).all()
+        repo_skills = PilotSkill.objects.filter(github_repo__full_name=og_repo).all()
+        skills = set(core_skills).union(repo_skills)
+        for skill in skills:
+            skill.instructions = render_markdown(skill.instructions)
+        # Eliminate duplicates by name
+        skills = {skill.title: skill for skill in skills}.values()
+        organized_skills = {}
+        for skill in skills:
+            if skill.category not in organized_skills:
+                organized_skills[skill.category] = []
+            organized_skills[skill.category].append(skill)
 
         return render(
             request,
             "create_experiment.html",
-            {"repo": repo, "title": f"New Experiment for {repo.full_name}"},
+            {
+                "repo": repo,
+                "title": f"New Experiment for {repo.full_name}",
+                "skills": organized_skills,
+            },
         )

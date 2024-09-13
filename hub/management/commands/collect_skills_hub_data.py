@@ -39,6 +39,7 @@ class Command(BaseCommand):
             if agent_skill.args:
                 for key, value in agent_skill.args.items():
                     pilot_skill.arguments.create(key=key, value=value)
+            pilot_skill.generate_meta_data()
             self.stdout.write(
                 self.style.SUCCESS(
                     f"Successfully stored skill {agent_skill.title!r} for {repo.full_name}"
@@ -77,9 +78,19 @@ class Command(BaseCommand):
                     try:
                         file_content = repo.get_contents(file_name)
                         if file_name == ".pilot-skills.yaml":
-                            self.scrape_pilot_skills(
-                                stored_repo, file_content.decoded_content.decode()
-                            )
+                            # Check if file sha has changed
+                            if file_content.sha == stored_repo.skills_file_hash:
+                                self.stdout.write(
+                                    self.style.WARNING(
+                                        f"File {file_name} has not changed for {project}, skipping"
+                                    )
+                                )
+                            else:
+                                self.scrape_pilot_skills(
+                                    stored_repo, file_content.decoded_content.decode()
+                                )
+                                stored_repo.skills_file_hash = file_content.sha
+                                stored_repo.save()
                         elif file_name == ".pilot-hints.md":
                             stored_repo.knowledge = (
                                 file_content.decoded_content.decode()

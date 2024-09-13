@@ -1,7 +1,7 @@
 {% extends "lab_base.html" %}
 
 {% block main_header %}
-    AE Labs Experiment <a href="/labs/" class="button is-success is-dark is-pulled-right"><span class="icon"><i class="fas fa-plus"></i></span></a>
+    AE Labs Experiment <a href="/labs/" class="button is-success is-outlined is-pulled-right"><span class="icon"><i class="fas fa-plus"></i></span></a>
 
 {% endblock %}
 
@@ -24,22 +24,17 @@
             </a>
             {% if experiment.task.status == "completed" %}
             <!-- Buttons for sharing on social media -->
-            <a href="https://twitter.com/intent/tweet?text={{ experiment.name|urlencode }}%0A%0A%23ArcaneEngineering%20%23AI%20%23Automation%20%23Productivity%0A%0A{{ request.build_absolute_uri }}" target="_blank" class="button is-info is-dark">
+            <a href="https://twitter.com/intent/tweet?text={{ experiment.name|urlencode }}%0A%0A%23ArcaneEngineering%20%23AI%20%23Automation%20%23Productivity%0A%0A{{ request.build_absolute_uri }}" target="_blank" class="button is-info is-light">
                 <span class="icon is-small"><i class="fab fa-twitter"></i></span> <span>Tweet</span>
             </a>
-            <a href="#" target="_blank" class="button is-info is-dark" id="linkedin-link">
+            <a href="#" target="_blank" class="button is-info is-light" id="linkedin-link">
                 <span class="icon is-small"><i class="fab fa-linkedin"></i></span> <span>Share</span>
             </a>
             {% endif %}
-            <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" class="button is-success is-dark">
+            <a href="/labs/{{ repo.full_name }}/{{ experiment.slug }}/copy/" class="button is-success is-outlined">
                 <span class="icon is-small"><i class="fa fa-copy"></i></span> <span>Replicate Experiment</span>
             </a>
-            {% if experiment.task.pr_number %}
-                <a href="{{ repo.html_url }}/pull/{{ experiment.task.pr_number }}/files" target="_blank" class="button is-dark">
-                    <span class="icon is-small"><i class="fab fa-github"></i></span> <span>View File Changes</span>
-                </a>
 
-            {% endif %}
 
 
         </div>
@@ -80,9 +75,50 @@
 
         </div>
     </div>
+    {% if skills %}
+    <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
+        To fulfill the task more efficiently, a set of <span class="icon has-text-warning is-small"><i class="fa fa-wrench"></i></span> <b>skills</b> were provided to the agent.
+    </div>
+    <div class="content is-size-6">
+        {%  for skill in skills %}
+
+                <div class="box has-background-warning-light skill-item" data-skill-id="{{ skill.id }}">
+
+                    <span>
+                        <span class="icon has-text-warning">
+                            <i class="{% if skill.fa_icon_classes %}{{ skill.fa_icon_classes }}{% else %}fas fa-brain{% endif %}"></i>
+                        </span>
+                        {{ skill.title }}
+                        {% for language in skill.programming_languages.all %}
+                            <span class="tag is-danger is-light">{{ language.name }}</span>
+                        {% endfor %}
+                        {% for framework in skill.programming_frameworks.all %}
+                            <span class="tag is-success is-light">{{ framework.name }}</span>
+                        {% endfor %}
+                    </span>
+
+                    <div class="block is-pulled-right">
+
+                        {% for tag in skill.tags.all %}
+                            <span class="skill-tag has-text-grey-light is-family-monospace  has-text-weight-light">#{{ tag.name }}</span>
+                        {% endfor %}
+                        <span class="button is-light is-warning skill-info-icon is-ghost">
+                            <span class="icon is-small has-text-warning"><i class="fa-solid fa-list-ol"></i></span>
+                        </span>
+                    </div>
+                    <!-- Skill instructions message window, hidden by default -->
+                    <div class="message is-warning is-small is-hidden mt-3" id="skill-instructions-{{ skill.id }}">
+                        <div class="message-body">
+                            {{ skill.instructions }}
+                        </div>
+                    </div>
+                </div>
+        {% endfor %}
+    </div>
+    {%  endif %}
     <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
         The agent {% if experiment.task.status == "running" %}is using{% else %}used{% endif %} its
-        <a href="https://docs.pr-pilot.ai/capabilities.html">capabilities</a> to autonomously fulfill the request:
+        <a href="https://docs.pr-pilot.ai/capabilities.html">capabilities</a>, the knowledge and the skills provided to autonomously fulfill the request:
     </div>
 
     <div class="content box has-background-white-bis">
@@ -134,7 +170,15 @@
     <div class="content is-size-5 has-text-weight-light p-5 has-text-centered">
         The agent <b class="has-text-success">{{ experiment.task.status }}</b> the task and responded:
     </div>
-    <div class="box content has-background-success-light">
+    <div class="box content has-text-weight-light is-size-5">
+        <div class="has-text-centered p-3">
+            {% if experiment.task.pr_number %}
+                <a href="{{ repo.html_url }}/pull/{{ experiment.task.pr_number }}/files" target="_blank" class="button">
+                    <span class="icon is-small"><i class="fab fa-github"></i></span> <span>View File Changes</span>
+                </a>
+
+            {% endif %}
+        </div>
         {{ experiment.task.result }}
     </div>
     {% endif %}
@@ -146,9 +190,9 @@
     <div class="box content has-background-danger-light">
         {{ experiment.task.result }}
     </div>
-        <div class="content has-text-centered">
-            <a href="/labs/{{ repo.full_name }}/new/" class="button is-success is-dark is-large">Start Over</a>
-        </div>
+    <div class="content has-text-centered">
+        <a href="/labs/{{ repo.full_name }}/new/" class="button is-success is-light is-large">Start Over</a>
+    </div>
 
 
     {% endif %}
@@ -161,77 +205,77 @@
     <script>
         $(document).ready(function() {
 
-        const url_encoded_current_url = encodeURIComponent(window.location.href);
+            const url_encoded_current_url = encodeURIComponent(window.location.href);
 
-        $('#linkedin-link').attr('href', `https://www.linkedin.com/shareArticle?mini=true&summary={{ experiment.name|urlencode }}&url=${url_encoded_current_url}`);
+            $('#linkedin-link').attr('href', `https://www.linkedin.com/shareArticle?mini=true&summary={{ experiment.name|urlencode }}&url=${url_encoded_current_url}`);
 
             // Open websocket to get task updates
-        const task = {
-            id: "{{ experiment.task.id }}",
-            status: "{{ experiment.task.status }}"
-        }
-        const taskEvents = [
-            {% for event in task_events %}
-            {
-                id: "{{ event.id }}",
-                timestamp: "{{ event.timestamp }}",
-                target: "{{ event.target }}",
-                action: "{{ event.action }}",
-                icon: "{{ event.icon }}",
-                seconds_since_start: {{ event.seconds_since_start }}
-            },
-            {% endfor %}
-        ];
-        let counter = 0;
-        {% if experiment.task.status == "running" %}
-            // Count up timer and set value in #second-counter
-            const lastEvent = taskEvents[taskEvents.length - 1];
-
-            if (lastEvent) {
-                counter = lastEvent.seconds_since_start;
+            const task = {
+                id: "{{ experiment.task.id }}",
+                status: "{{ experiment.task.status }}"
             }
-            function countUp() {
-                counter++;
-                $("#second-counter").text(counter);
-            }
-            setInterval(countUp, 1000);
-        {% endif %}
+            const taskEvents = [
+                {% for event in task_events %}
+                    {
+                        id: "{{ event.id }}",
+                        timestamp: "{{ event.timestamp }}",
+                        target: "{{ event.target }}",
+                        action: "{{ event.action }}",
+                        icon: "{{ event.icon }}",
+                        seconds_since_start: {{ event.seconds_since_start }}
+                    },
+                {% endfor %}
+            ];
+            let counter = 0;
+            {% if experiment.task.status == "running" %}
+                // Count up timer and set value in #second-counter
+                const lastEvent = taskEvents[taskEvents.length - 1];
 
-        const ACTION_FA_ICON_MAP = {
-            "invoke_skill": "forward",
-            "finish_skill": "backward",
-            "push_branch": "code-branch",
-            "checkout_branch": "code-branch",
-            "write_file": "edit",
-            "list_directory": "folder",
-            "search_code": "search",
-            "search": "search",
-            "search_issues": "search",
-            "read_github_issue": "file-alt",
-            "read_pull_request": "file-alt",
-            "read_files": "file-alt",
-        }
-
-        {% if experiment.task.status == "running" %}
-
-        function connectWebSocket() {
-            const ws = new WebSocket("wss://{{ request.get_host }}/ws/tasks/{{ experiment.task.id }}/events/");
-
-            ws.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                const msgType = data['type'];
-
-                if (msgType === "status_update") {
-                    window.location.reload();
+                if (lastEvent) {
+                    counter = lastEvent.seconds_since_start;
                 }
+                function countUp() {
+                    counter++;
+                    $("#second-counter").text(counter);
+                }
+                setInterval(countUp, 1000);
+            {% endif %}
 
-                if (msgType === "event") {
-                    const event = data['data'];
-                    taskEvents.push(event);
-                    event.icon = ACTION_FA_ICON_MAP[event.action] || "check";
-                    const converter = new showdown.Converter();
-                    const htmlMessage = converter.makeHtml(event.message);
-                    $('.table tbody').append(`
+            const ACTION_FA_ICON_MAP = {
+                "invoke_skill": "forward",
+                "finish_skill": "backward",
+                "push_branch": "code-branch",
+                "checkout_branch": "code-branch",
+                "write_file": "edit",
+                "list_directory": "folder",
+                "search_code": "search",
+                "search": "search",
+                "search_issues": "search",
+                "read_github_issue": "file-alt",
+                "read_pull_request": "file-alt",
+                "read_files": "file-alt",
+            }
+
+            {% if experiment.task.status == "running" or experiment.task.status == "scheduled" or experiment.task.status == "created" %}
+
+                function connectWebSocket() {
+                    const ws = new WebSocket("wss://{{ request.get_host }}/ws/tasks/{{ experiment.task.id }}/events/");
+
+                    ws.onmessage = function (event) {
+                        const data = JSON.parse(event.data);
+                        const msgType = data['type'];
+
+                        if (msgType === "status_update") {
+                            window.location.reload();
+                        }
+
+                        if (msgType === "event") {
+                            const event = data['data'];
+                            taskEvents.push(event);
+                            event.icon = ACTION_FA_ICON_MAP[event.action] || "check";
+                            const converter = new showdown.Converter();
+                            const htmlMessage = converter.makeHtml(event.message);
+                            $('.table tbody').append(`
             <tr class="has-background-white-bis">
                 <td class="has-text-weight-light">${counter}</td>
                 <td><span class="icon"><i class="fa fa-${event.icon}"></i></span></td>
@@ -239,29 +283,35 @@
             </tr>
         `);
 
-                    // Swap the last and second to last row in the table
-                    const lastRow = $('.table tbody tr:last');
-                    const secondLastRow = $('.table tbody tr:nth-last-child(2)');
-                    lastRow.insertBefore(secondLastRow);
+                            // Swap the last and second to last row in the table
+                            const lastRow = $('.table tbody tr:last');
+                            const secondLastRow = $('.table tbody tr:nth-last-child(2)');
+                            lastRow.insertBefore(secondLastRow);
+                        }
+
+                        console.log(data);
+                    };
+
+                    ws.onclose = function () {
+                        console.log('WebSocket closed. Reconnecting in 1 second...');
+                        setTimeout(connectWebSocket, 1000); // Try to reconnect after 1 seconds
+                    };
+
+                    ws.onerror = function (error) {
+                        console.error('WebSocket error:', error);
+                        ws.close(); // Close the WebSocket to trigger the reconnect
+                    };
                 }
 
-                console.log(data);
-            };
+                // Initiate the WebSocket connection
+                connectWebSocket();
+            {% endif %}
 
-            ws.onclose = function() {
-                console.log('WebSocket closed. Reconnecting in 1 second...');
-                setTimeout(connectWebSocket, 1000); // Try to reconnect after 1 seconds
-            };
-
-            ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
-                ws.close(); // Close the WebSocket to trigger the reconnect
-            };
-        }
-
-        // Initiate the WebSocket connection
-        connectWebSocket();
-        {% endif %}
+            // When skill info button is hovered, show the skill instructions
+            $('.skill-info-icon').click(function () {
+                const skillId = $(this).closest('.skill-item').data('skill-id');
+                $(`#skill-instructions-${skillId}`).toggleClass('is-hidden');
+            });
         });
     </script>
 {% endblock %}

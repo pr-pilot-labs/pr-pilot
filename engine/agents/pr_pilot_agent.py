@@ -136,8 +136,10 @@ def move_file(source: str, destination: str):
 
 
 @tool
-def write_file(path: str, complete_entire_file_content: str, commit_message: str = None):
-    """Write content to a file.
+def write_file(
+    path: str, complete_entire_file_content: str, commit_message: str = None
+):
+    """Write content to a file and provide a commit message describing the content/changes.
     :param path: Path to the file
     :param complete_entire_file_content: Complete content of the file. NEVER use placeholders or partial content.
     :param commit_message: Short commit message for the change

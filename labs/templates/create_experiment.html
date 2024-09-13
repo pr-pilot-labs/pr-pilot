@@ -5,10 +5,9 @@
 
 {% endblock %}
 
-
 {% block top_content %}
     <div class="content">
-        <p class=" is-size-5 has-text-weight-light">
+        <p class=" is-size-5 has-text-weight-light box is-shadowless">
             <b>Instruct an <a href="https://www.pr-pilot.ai" target="_blank">AI developer assistant</a> to fulfill a task on <a href="{{ repo.html_url }}" target="_blank"><span class="icon is-small"><i class="fab fa-github"></i></span> {{ repo.full_name }}</b></a>.
             The agent will fork the repo, use its own <a href="https://docs.pr-pilot.ai/capabilities.html" target="_blank">capabilities</a> to fulfill the task autonomously and present you with the results.
         </p>
@@ -55,21 +54,118 @@
                 </div>
             </div>
 
+            {% if skills %}
             <div class="field has-text-weight-normal">
-                <p class="is-size-5">
-                    Now, <b>let the agent get to work</b>!
-                </p>
-            </div>
+                <div class="columns">
+                    <div class="column is-one-third">
+                        <p class="is-size-5">
+                            <b class="has-text-warning">Select skills for the agent to use</b>  to fulfill the task.
+                        </p>
+                        <div class="is-size-6 has-text-centered has-text-weight-light content p-2" id="skills-info">
+                            <a href="https://docs.pr-pilot.ai/user_guide.html#knowledge-and-skills-how-to-train-your-agent" target="_blank">
+                                    <span class="icon is-small has-text-info">
+                                        <i class="fas fa-info-circle"></i>
+                                    </span>
+                            </a>
+                            <span>
+                                    Skills are like mini-programs that the agent can use to fulfill your task more efficiently. Select the ones you think are most relevant for your instructions.
+                                </span>
 
-            <div class="field">
-                <button class="button is-success is-large has-text-weight-light" type="submit">
-                    Fork repo and run instructions
-                </button>
-                <div class="is-size-7">
-                    * All forks are created by <a href="https://github.com/pr-pilot-labs" target="_blank">pr-pilot-labs</a>
+                        </div>
+                        <div id="selected-skills" class="content">
+
+                        </div>
+                    </div>
+                    <div class="column">
+
+                        <!-- Skills organized in tabs by category -->
+                        <div class="tabs is-centered is-toggle is-toggle-rounded is-full-width">
+                            <ul>
+                                {% for category, skills in skills.items %}
+                                <li class="{% if forloop.first %}is-active{% endif %} is-danger">
+                                    <a href="#{{ category }}" class="category-tab" data-category="{{ category }}">
+                                        <span class="icon is-small">
+                                            {%  if category == "Other" %}
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            {% elif category == "Utility" %}
+                                                <i class="fas fa-tools" aria-hidden="true"></i>
+                                            {% elif category == "Content" %}
+                                                <i class="fas fa-file-alt"></i>
+                                            {% elif category == "Code" %}
+                                                <i class="fas fa-code" aria-hidden="true"></i>
+                                            {% endif %}
+                                        </span>
+                                        <span>{{ category }}</span>
+                                    </a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div id="skills-container">
+
+                            {% for category, skills in skills.items %}
+                            <div class="skills-list" id="{{ category }}-skills" style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+                                {% for skill in skills %}
+                                <div class="box skill-item" data-skill-id="{{ skill.id }}">
+                                    <p class="title is-6">
+                                        <span>
+                                            <span class="icon has-text-warning">
+                                                <i class="{% if skill.fa_icon_classes %}{{ skill.fa_icon_classes }}{% else %}fas fa-brain{% endif %}"></i>
+                                            </span>
+                                        </span>
+                                        <span class="skill-title" data-skill-id="{{ skill.id }}">{{ skill.title }}</span>
+                                        <span class="button is-light is-warning skill-info-icon is-ghost is-pulled-right">
+                                            <span class="icon is-small has-text-warning"><i class="fa-solid fa-list-ol"></i></span>
+                                        </span>
+                                    </p>
+
+                                    <div class="block">
+                                        <span class="icon button add-button mr-3">
+                                            <i class="fas fa-plus"></i>
+                                        </span>
+                                        {% for language in skill.programming_languages.all %}
+                                            <span class="tag is-danger is-light">{{ language.name }}</span>
+                                        {% endfor %}
+                                        {% for framework in skill.programming_frameworks.all %}
+                                            <span class="tag is-success is-light">{{ framework.name }}</span>
+                                        {% endfor %}
+                                        {% for tag in skill.tags.all %}
+                                            <span class="skill-tag is-small has-text-grey-light is-family-monospace  has-text-weight-light">#{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Skill instructions message window, hidden by default -->
+                                    <div class="message is-warning is-small is-hidden mt-3" id="skill-instructions-{{ skill.id }}">
+                                        {{ skill.instructions }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="field has-text-weight-normal">
+                <div class="columns">
+                    <div class="column is-one-third is-size-5">
+                        <button class="button is-success is-large is-outlined" type="submit">
+                            Run Experiment
+                        </button>
+
+                    </div>
+                    <div class="column">
+                        <div class="control">
+                            <div class="is-size-6 has-text-weight-light mt-1">
+                                * All forks are created by <a href="https://github.com/pr-pilot-labs" target="_blank">pr-pilot-labs</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
+            <input type="hidden" name="selected_skill_ids" id="selected_skill_ids" value="">
         </form>
 
     </div>
@@ -78,7 +174,49 @@
             // When the fork button is clicked, disable it and turn the text into "Preparing Experiment ..."
             $('form').submit(function() {
                 $('button').addClass('is-loading').text('Preparing Experiment ...');
+                var selectedSkillIds = [];
+                $('#selected-skills .skill-item').each(function() {
+                    selectedSkillIds.push($(this).data('skill-id'));
+                });
+                $('#selected_skill_ids').val(selectedSkillIds.join(','));
+            });
+
+            // Tab click event
+            $('.category-tab').click(function(e) {
+                e.preventDefault();
+                var category = $(this).data('category');
+                $('.category-tab').parent().removeClass('is-active');
+                $(this).parent().addClass('is-active');
+                $('.skills-list').hide();
+                $('#' + category + '-skills').show();
+            });
+
+            // Skill click event
+            $('.skill-item .add-button').click(function() {
+                var parentBox = $(this).closest('.skill-item');
+                var skillId = parentBox.data('skill-id');
+                var skillHtml = parentBox.prop('outerHTML');
+                parentBox.addClass('is-disabled')
+                parentBox.find('.add-button').attr('disabled', true);
+                var skillElement = $(skillHtml);
+                skillElement.removeClass('box')
+                skillElement.find('.skill-tag').remove();
+                skillElement.find('.add-button').remove();
+                skillElement.find('.tag').remove();
+                skillElement.find('.title').removeClass('is-5').addClass('is-6 has-text-weight-light');
+                $('#selected-skills').append(skillElement);
+                $('#skills-info').hide();
+                parentBox.addClass('has-background-success-light');
+                parentBox.find('.title').addClass('has-text-success-dark');
+            });
+
+
+            // When skill info button is clicked, show the skill instructions
+            $('.skill-info-icon').click(function () {
+                const skillId = $(this).closest('.skill-item').data('skill-id');
+                $(`#skill-instructions-${skillId}`).toggleClass('is-hidden');
             });
         });
     </script>
+
 {% endblock %}

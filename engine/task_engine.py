@@ -219,7 +219,7 @@ class TaskEngine:
                     "pilot_hints": (
                         self.project.load_pilot_hints() + f"\n\n{additional_knowledge}"
                         if additional_knowledge
-                        else ""
+                        else self.project.load_pilot_hints()
                     ),
                     "current_time": date_and_time,
                     "custom_skills": custom_skills,
