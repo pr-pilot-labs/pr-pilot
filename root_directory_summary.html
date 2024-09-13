@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Pilot Project Overview</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
+    <style>
+        body { padding-top: 20px; }
+        .container { max-width: 800px; }
+        .file-summary { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">📄 PR Pilot Project Overview</h1>
+            <div class="file-summary box">
+                <h2 class="subtitle">📘 README.md</h2>
+                <p>The README file provides an overview of the PR Pilot project, including installation instructions, usage examples, and contribution guidelines. It highlights the various ways to interact with PR Pilot, such as through the CLI, Python SDK, REST API, and Smart Workflows. The file also includes badges for build status, Python and Django versions, license, and project version.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🛠️ Makefile</h2>
+                <p>The Makefile contains various commands for building, deploying, and managing the PR Pilot project. It includes targets for building Docker images, pushing them to a registry, deploying the application using Helm, and running unit tests. The file also defines environment variables and phony targets for better organization.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🐳 Dockerfile</h2>
+                <p>The Dockerfile defines the steps to create a Docker image for the PR Pilot application. It sets up the environment, installs dependencies, copies the project files, and configures uWSGI for serving the application. The file ensures that the application runs on port 8000.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">📦 requirements.txt</h2>
+                <p>The requirements.txt file lists all the Python dependencies required for the PR Pilot project. It includes packages for Django, REST framework, OpenAI, Git integration, Sentry, and more. These dependencies are essential for the various functionalities of the project.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🔢 version.txt</h2>
+                <p>The version.txt file contains the current version of the PR Pilot project. This version number is used in various parts of the project, including Docker image tagging and deployment processes.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
