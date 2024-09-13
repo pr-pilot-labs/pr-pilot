@@ -63,7 +63,7 @@ def copy_experiment(request, github_user, github_repo, slug):
         return render(request, "error.html", {"error": "Experiment not found."})
 
     if request.method == "GET":
-        # Get knowledge and instructions from the existing experiment
+        organized_skills = collect_skills_for_new_experiment(repo)
         return render(
             request,
             "create_experiment.html",
@@ -72,6 +72,7 @@ def copy_experiment(request, github_user, github_repo, slug):
                 "title": f"New Experiment for {repo.full_name}",
                 "instructions": experiment.task.user_request,
                 "knowledge": experiment.knowledge,
+                "skills": organized_skills,
             },
         )
     else:
@@ -182,22 +183,7 @@ def create_experiment(request, github_user, github_repo):
             slug=experiment.slug,
         )
     elif request.method == "GET":
-        og_repo = repo.source.full_name
-        core_skills = PilotSkill.objects.filter(
-            github_repo__full_name="PR-Pilot-AI/core"
-        ).all()
-        repo_skills = PilotSkill.objects.filter(github_repo__full_name=og_repo).all()
-        skills = set(core_skills).union(repo_skills)
-        for skill in skills:
-            skill.instructions = render_markdown(skill.instructions)
-        # Eliminate duplicates by name
-        skills = {skill.title: skill for skill in skills}.values()
-        organized_skills = {}
-        for skill in skills:
-            if skill.category not in organized_skills:
-                organized_skills[skill.category] = []
-            organized_skills[skill.category].append(skill)
-
+        organized_skills = collect_skills_for_new_experiment(repo)
         return render(
             request,
             "create_experiment.html",
@@ -207,3 +193,21 @@ def create_experiment(request, github_user, github_repo):
                 "skills": organized_skills,
             },
         )
+
+
+def collect_skills_for_new_experiment(repo):
+    core_skills = PilotSkill.objects.filter(
+        github_repo__full_name="PR-Pilot-AI/core"
+    ).all()
+    repo_skills = PilotSkill.objects.filter(github_repo__full_name=repo.full_name).all()
+    skills = set(core_skills).union(repo_skills)
+    for skill in skills:
+        skill.instructions = render_markdown(skill.instructions)
+    # Eliminate duplicates by name
+    skills = {skill.title: skill for skill in skills}.values()
+    organized_skills = {}
+    for skill in skills:
+        if skill.category not in organized_skills:
+            organized_skills[skill.category] = []
+        organized_skills[skill.category].append(skill)
+    return organized_skills
