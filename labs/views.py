@@ -139,7 +139,7 @@ def create_experiment(request, github_user, github_repo):
     if request.method == "POST":
         instructions = request.POST.get("instructions")
         knowledge = request.POST.get("knowledge")
-        skill_ids = request.POST.get("selected_skill_ids").split(",")
+        skill_ids = [x for x in request.POST.get("selected_skill_ids").split(",") if x]
         user = g.get_user()
         fork = user.create_fork(repo)
         fork.edit(has_wiki=True, has_issues=True)
@@ -167,10 +167,15 @@ def create_experiment(request, github_user, github_repo):
             slug = slugify(title + "-" + str(time.time()))
 
         experiment = Experiment.objects.create(
-            name=title, slug=slug, knowledge=knowledge, task=task, github_project=repo.full_name
+            name=title,
+            slug=slug,
+            knowledge=knowledge,
+            task=task,
+            github_project=repo.full_name,
         )
-        experiment.skills.set(PilotSkill.objects.filter(id__in=skill_ids).all())
-        experiment.save()
+        if skill_ids:
+            experiment.skills.set(PilotSkill.objects.filter(id__in=skill_ids).all())
+            experiment.save()
         try:
             task.schedule()
         except SchedulerError as e:

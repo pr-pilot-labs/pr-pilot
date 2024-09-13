@@ -21,4 +21,10 @@ class Command(BaseCommand):
             scope.set_tag("github_project", task.github_project)
             scope.set_tag("github_issue", task.issue_number)
             scope.set_tag("github_pr", task.pr_number)
-            engine.run()
+            if task.experiment_set.count() > 0:
+                experiment = task.experiment_set.first()
+                additional_knowledge = experiment.knowledge
+                skills = list(experiment.skills.all())
+            engine.run(
+                additional_knowledge=additional_knowledge, overwrite_pilot_skills=skills
+            )

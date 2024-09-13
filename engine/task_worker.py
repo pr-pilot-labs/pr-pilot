@@ -37,5 +37,10 @@ class TaskWorker:
 
                 additional_knowledge = ""
                 if task.experiment_set.count() > 0:
-                    additional_knowledge = task.experiment_set.first().knowledge
-                engine.run(additional_knowledge=additional_knowledge)
+                    experiment = task.experiment_set.first()
+                    additional_knowledge = experiment.knowledge
+                    skills = list(experiment.skills.all())
+                engine.run(
+                    additional_knowledge=additional_knowledge,
+                    overwrite_pilot_skills=skills,
+                )

@@ -1,7 +1,12 @@
 import logging
 
 from django.db import models
+from langchain_core.tools import StructuredTool
+from pydantic.v1 import create_model
+from pydantic.v1.fields import FieldInfo
 
+from engine.agents.skills import build_agent_skill_tool_function
+from engine.util import slugify
 from hub.meta import generate_metadata
 
 
@@ -72,6 +77,26 @@ class PilotSkill(models.Model):
             ]
         )
         self.save()
+
+    def to_agent_tool(self, task, project_info, pilot_hints):
+        """Convert the user-defined skill to a LangChain tool."""
+        final_instructions = self.instructions
+        if self.result:
+            final_instructions += f"\n\nRespond with: {self.result}"
+        fields = {}
+        if self.arguments.exists():
+            for arg in self.arguments.all():
+                fields[arg.key] = (str, FieldInfo(title=arg.value))
+        AgentSkillToolSchema = create_model("AgentSkillToolSchema", **fields)
+
+        return StructuredTool(
+            name=slugify(self.title),
+            func=build_agent_skill_tool_function(
+                task, project_info, pilot_hints, self.instructions, self.title
+            ),
+            description=self.title,
+            args_schema=AgentSkillToolSchema,
+        )
 
 
 class PilotSkillArgument(models.Model):

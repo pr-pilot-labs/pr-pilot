@@ -4,6 +4,7 @@ import os
 import shutil
 import threading
 from decimal import Decimal
+from typing import List
 
 from django.conf import settings
 from django.utils import timezone
@@ -24,6 +25,7 @@ from engine.models.task_event import TaskEvent
 from engine.project import Project
 from engine.repo_cache import RepoCache
 from engine.util import slugify
+from hub.models import PilotSkill
 from webhooks.jwt_tools import get_installation_access_token
 
 logger = logging.getLogger(__name__)
@@ -126,7 +128,15 @@ class TaskEngine:
             },
         )
 
-    def run(self, additional_knowledge=None, overwrite_pilot_skills=[]) -> str:
+    def run(
+        self, additional_knowledge=None, overwrite_pilot_skills: List[PilotSkill] = ()
+    ) -> str:
+        """
+        Run the task.
+        :param additional_knowledge: Additional knowledge to include in the task
+        :param overwrite_pilot_skills: If non-empty, these skills will be used instead of the user-defined skills from the repo
+        :return:
+        """
         self.task.status = "running"
         self.broadcast_status_update("running")
         self.task.save()
@@ -190,8 +200,17 @@ class TaskEngine:
             date_and_time = (
                 timezone.now().isoformat() + " " + str(timezone.get_current_timezone())
             )
+
+            # Assemble knowledge
+            all_knowledge = (
+                self.project.load_pilot_hints() + f"\n\n{additional_knowledge}"
+            ).strip()
+
             pilot_skills = (
-                overwrite_pilot_skills
+                [
+                    skill.to_agent_tool(self.task, project_info, all_knowledge)
+                    for skill in overwrite_pilot_skills
+                ]
                 if overwrite_pilot_skills
                 else self.project.load_pilot_skills(self.task, project_info)
             )
@@ -216,11 +235,7 @@ class TaskEngine:
                     "user_request": self.task.user_request,
                     "github_project": self.task.github_project,
                     "project_info": project_info,
-                    "pilot_hints": (
-                        self.project.load_pilot_hints() + f"\n\n{additional_knowledge}"
-                        if additional_knowledge
-                        else self.project.load_pilot_hints()
-                    ),
+                    "pilot_hints": (all_knowledge),
                     "current_time": date_and_time,
                     "custom_skills": custom_skills,
                 }
