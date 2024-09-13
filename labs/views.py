@@ -167,7 +167,7 @@ def create_experiment(request, github_user, github_repo):
             slug = slugify(title + "-" + str(time.time()))
 
         experiment = Experiment.objects.create(
-            name=title, slug=slug, knowledge=knowledge, task=task
+            name=title, slug=slug, knowledge=knowledge, task=task, github_project=repo.full_name
         )
         experiment.skills.set(PilotSkill.objects.filter(id__in=skill_ids).all())
         experiment.save()

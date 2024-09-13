@@ -26,15 +26,15 @@
                 <tr>
                     <td class="has-text-weight-light">{{ experiment.created_at | date }}</td>
                     <td>
-                        <a href="https://github.com/{{ experiment.task.github_project }}" target="_blank" class="button is-small">
+                        <a href="https://github.com/{{ experiment.github_project }}" target="_blank" class="button is-small">
                             <span class="icon"><i class="fab fa-github"></i></span>
                         </a>
-                        <a href="/labs/{{ experiment.task.github_project }}/new/" class="button is-info is-small is-dark">
+                        <a href="/labs/{{ experiment.github_project }}/new/" class="button is-info is-small is-dark">
                             <span class="icon"><i class="fas fa-plus"></i></span>
                         </a>
                     </td>
-                    <td>{{ experiment.task.github_project }}</td>
-                    <td class="has-text-weight-light"><a href="/labs/{{ experiment.task.github_project }}/{{ experiment.slug }}/">{{ experiment.name }}</a></td>
+                    <td class="is-family-monospace">{{ experiment.github_project }}</td>
+                    <td class="has-text-weight-light"><a href="/labs/{{ experiment.github_project }}/{{ experiment.slug }}/">{{ experiment.name }}</a></td>
                 </tr>
             {% endfor %}
             </tbody>
