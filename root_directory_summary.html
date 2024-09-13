@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Pilot Project Overview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 20px; }
+        .container { max-width: 800px; }
+        .file-summary { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">📄 PR Pilot Project Overview</h1>
+            <div class="file-summary box">
+                <h2 class="subtitle">📘 README.md</h2>
+                <p>The README file provides an overview of the PR Pilot project, including installation instructions, usage examples, and contribution guidelines. It highlights the various ways to interact with PR Pilot, such as through the CLI, Python SDK, REST API, and Smart Workflows. The file also includes badges for build status, Python version, Django version, license, and project version.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🛠️ Makefile</h2>
+                <p>The Makefile contains various commands for building, deploying, and managing the PR Pilot project. It includes targets for building Docker images, pushing them to a registry, deploying the application using Helm, and running tests. The Makefile also provides commands for managing Kubernetes secrets and generating PR descriptions.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🐳 Dockerfile</h2>
+                <p>The Dockerfile defines the environment for running the PR Pilot application. It uses a Python 3.11 slim image as the base and installs necessary dependencies, including uWSGI for serving the application. The Dockerfile also sets environment variables, copies the project files, and exposes port 8000 for the application.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">🤝 CONTRIBUTING.md</h2>
+                <p>The CONTRIBUTING file outlines the guidelines for contributing to the PR Pilot project. It encourages users to report bugs, discuss code changes, submit fixes, propose new features, and become maintainers. The file also provides instructions for using GitHub Flow, writing detailed bug reports, and ensuring contributions are licensed under the GPL-3 License.</p>
+            </div>
+            <div class="file-summary box">
+                <h2 class="subtitle">📦 requirements.txt</h2>
+                <p>The requirements file lists the dependencies needed to run the PR Pilot project. It includes various Python packages such as Django, PyGithub, langchain, openai, GitPython, and more. These dependencies are essential for the functionality of the application, including API interactions, web framework, and AI integrations.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
