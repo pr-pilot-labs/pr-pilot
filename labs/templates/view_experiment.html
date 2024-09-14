@@ -128,7 +128,7 @@
         <!-- Render task events using BulmaCSS Table -->
         <div class="table-container">
             <table class="table is-fullwidth">
-                <tbody>
+                <tbody id="task-events-body">
                 {% for event in task_events %}
                     <tr class="{% if not event.indent %}has-background-white-bis{% else %}has-background-white-ter has-text-weight-light{% endif %}">
                         <td class="has-text-weight-light">
@@ -276,13 +276,7 @@
                             event.icon = ACTION_FA_ICON_MAP[event.action] || "check";
                             const converter = new showdown.Converter();
                             const htmlMessage = converter.makeHtml(event.message);
-                            $('.table tbody').append(`
-            <tr class="has-background-white-bis">
-                <td class="has-text-weight-light">${counter}</td>
-                <td><span class="icon"><i class="fa fa-${event.icon}"></i></span></td>
-                <td>${htmlMessage}</td>
-            </tr>
-        `);
+                            addTaskEvent(counter, event.icon, htmlMessage);
 
                             // Swap the last and second to last row in the table
                             const lastRow = $('.table tbody tr:last');
@@ -314,5 +308,15 @@
                 $(`#skill-instructions-${skillId}`).toggleClass('is-hidden');
             });
         });
+
+        function addTaskEvent(counter, icon, message) {
+            $('#task-events-body').append(`
+                <tr class="has-background-white-bis">
+                    <td class="has-text-weight-light">${counter}</td>
+                    <td><span class="icon"><i class="fa fa-${icon}"></i></span></td>
+                    <td>${message}</td>
+                </tr>
+            `);
+        }
     </script>
 {% endblock %}
