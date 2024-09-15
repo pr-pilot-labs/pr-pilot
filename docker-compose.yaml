@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    image: pr-pilot:latest
+    build:
+      context: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - pem-volume:/etc/ssl/certs/github_private_key.pem
+    ports:
+      - "8000:8000"
+    environment:
+      GITHUB_APP_PRIVATE_KEY_PATH: "/etc/ssl/certs/github_private_key.pem"
+      REDIS_HOST: redis
+      POSTGRES_PASSWORD: examplepassword
+    depends_on:
+      - redis
+      - db
+
+  worker:
+    image: pr-pilot:latest
+    build:
+      context: .
+    command: python manage.py run_task_worker
+    volumes:
+      - .:/app
+      - pem-volume:/etc/ssl/certs/github_private_key.pem
+      - repo-cache:/repo_cache
+    environment:
+      GITHUB_APP_PRIVATE_KEY_PATH: "/etc/ssl/certs/github_private_key.pem"
+      REDIS_HOST: redis
+      POSTGRES_PASSWORD: examplepassword
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: prpilot
+      POSTGRES_USER: prpilot
+      POSTGRES_PASSWORD: examplepassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pem-volume:
+  repo-cache:
+  pgdata:
