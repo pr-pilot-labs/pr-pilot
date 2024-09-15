@@ -11,6 +11,7 @@ class Experiment(models.Model):
     skills = models.ManyToManyField("hub.PilotSkill")
     knowledge = models.TextField()
     github_project = models.CharField(max_length=100, blank=True, null=True)
+    metadata = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.name
