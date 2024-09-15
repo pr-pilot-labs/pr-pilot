@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  app:
+    image: pr-pilot-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GITHUB_APP_CLIENT_ID=${GITHUB_APP_CLIENT_ID}
+      - GITHUB_APP_SECRET=${GITHUB_APP_SECRET}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REPO_DIR=${REPO_DIR}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - JOB_STRATEGY=${JOB_STRATEGY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+
+  worker:
+    image: pr-pilot-worker:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      - GITHUB_APP_CLIENT_ID=${GITHUB_APP_CLIENT_ID}
+      - GITHUB_APP_SECRET=${GITHUB_APP_SECRET}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET}
+      - GITHUB_APP_ID=${GITHUB_APP_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REPO_DIR=${REPO_DIR}
+      - TAVILY_API_KEY=${TAVILY_API_KEY}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - JOB_STRATEGY=${JOB_STRATEGY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - redis
+      - db
+
+  nginx:
+    image: pr-pilot-static:latest
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=prpilot
+      - POSTGRES_USER=prpilot
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
