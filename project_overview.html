@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Pilot Project Overview</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        h1, h2, h3 { margin-top: 20px; }
+        p { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section class="section">
+            <div class="content has-text-centered">
+                <h1 class="title">PR Pilot Project Overview</h1>
+                <p><strong>Current date and time:</strong> 2024-09-15T01:32:10.244338+00:00 UTC</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">Project Description</h2>
+                <p>PR Pilot is a developer tool/platform that assists developers in their daily work and integrates with the dev tools they use daily.</p>
+                <ul>
+                    <li>Django/Python/Docker/Kubernetes</li>
+                    <li>Dependencies in <code>requirements.txt</code></li>
+                    <li>Version number maintained in <code>version.txt</code></li>
+                    <li>Helm chart in <code>helm-chart/</code></li>
+                    <li>The Sentry project slug is <code>python-django</code></li>
+                    <li>The CLI is not part of this project, but in PR-Pilot-AI/pr-pilot-cli</li>
+                </ul>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">Domain Model</h2>
+                <p>Everything in PR Pilot is a task. Tasks are created using prompts, via the API or webhooks. Tasks are run by the task engine in <code>engine/</code>.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">The API</h2>
+                <p>Implemented with Django DRF in <code>api/</code>. Provides endpoints for creating tasks, history. Used by the SDK, CLI, Github actions, etc.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">The Dashboard</h2>
+                <p>Implemented using Django templates and views in <code>dashboard/</code>. Frontend uses Bootstrap 5.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">The Hub</h2>
+                <p>Implemented using Django templates and views in <code>hub/</code>. Allows users to discover knowledge, skills and commands of public repos that are using PR Pilot.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">The Lab</h2>
+                <p>Implemented using Django templates and views in <code>labs/</code>. Allows users to run AI experiments on any public Github repo. Users provide instructions, knowledge and PR Pilot runs the experiment.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">Tests</h2>
+                <p>Use pytest functions. Use <code>pytest.fixture</code>, <code>pytest.mark.parametrize</code> to keep things organized. Use <code>MagicMock</code> to mock external dependencies or API calls.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">Deployment</h2>
+                <p>Deployed using Helm Charts in our Kubernetes cluster. Deployment happens manually, all commands are in the Makefile.</p>
+            </div>
+        </section>
+        <section class="section">
+            <div class="content">
+                <h2 class="subtitle">Other</h2>
+                <p>Docs implemented in Sphinx in <code>docs/</code>. Makefile does all the building.</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
