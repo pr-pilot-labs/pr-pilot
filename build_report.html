@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Build Report</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <h1 class="title"><i class="fas fa-file-alt"></i> Project Build Report</h1>
+            <section class="section">
+                <h2 class="subtitle"><i class="fas fa-info-circle"></i> Executive Summary</h2>
+                <p>This report provides a detailed analysis of the build scripts found in the root directory of the PR Pilot repository. The analysis includes the Makefile, Dockerfile, and Dockerfile.worker, which are essential for building and deploying the project.</p>
+            </section>
+            <section class="section">
+                <h2 class="subtitle"><i class="fas fa-list"></i> Table of Contents</h2>
+                <ul>
+                    <li><a href="#makefile"><i class="fas fa-file-code"></i> Makefile</a></li>
+                    <li><a href="#dockerfile"><i class="fas fa-file-code"></i> Dockerfile</a></li>
+                    <li><a href="#dockerfile-worker"><i class="fas fa-file-code"></i> Dockerfile.worker</a></li>
+                </ul>
+            </section>
+            <section class="section" id="makefile">
+                <h2 class="subtitle"><i class="fas fa-file-code"></i> Makefile</h2>
+                <p>The Makefile defines several targets for building, deploying, and managing the project. Key targets include:</p>
+                <ul>
+                    <li><strong>build-static:</strong> Collects static files using Django's <code>collectstatic</code> command.</li>
+                    <li><strong>build-docker:</strong> Builds Docker images for the application, worker, and NGINX using the specified version.</li>
+                    <li><strong>docker-push:</strong> Tags and pushes Docker images to the specified registry.</li>
+                    <li><strong>deploy:</strong> Deploys the application using Helm charts.</li>
+                    <li><strong>create-k8s-secrets:</strong> Manages Kubernetes secrets.</li>
+                    <li><strong>makemigrations:</strong> Runs Django's <code>makemigrations</code> command.</li>
+                </ul>
+            </section>
+            <section class="section" id="dockerfile">
+                <h2 class="subtitle"><i class="fas fa-file-code"></i> Dockerfile</h2>
+                <p>The Dockerfile is used to build the main application image. Key steps include:</p>
+                <ul>
+                    <li>Setting environment variables to optimize Python's behavior.</li>
+                    <li>Installing system dependencies required for uWSGI.</li>
+                    <li>Installing Python dependencies from <code>requirements.txt</code>.</li>
+                    <li>Copying the project files into the Docker image.</li>
+                    <li>Configuring and running uWSGI to serve the application.</li>
+                </ul>
+            </section>
+            <section class="section" id="dockerfile-worker">
+                <h2 class="subtitle"><i class="fas fa-file-code"></i> Dockerfile.worker</h2>
+                <p>The Dockerfile.worker is used to build the worker image. Key steps include:</p>
+                <ul>
+                    <li>Setting environment variables to optimize Python's behavior.</li>
+                    <li>Installing Git and ripgrep for code management and searching.</li>
+                    <li>Installing Python dependencies from <code>requirements.txt</code>.</li>
+                    <li>Copying the project files into the Docker image.</li>
+                    <li>Configuring Git for the worker's operations.</li>
+                    <li>Running the task using Django's <code>manage.py run_task</code> command.</li>
+                </ul>
+            </section>
+            <section class="section">
+                <h2 class="subtitle"><i class="fas fa-book"></i> References</h2>
+                <ul>
+                    <li><a href="Makefile">Makefile</a></li>
+                    <li><a href="Dockerfile">Dockerfile</a></li>
+                    <li><a href="Dockerfile.worker">Dockerfile.worker</a></li>
+                </ul>
+            </section>
+        </div>
+    </div>
+</body>
+</html>
