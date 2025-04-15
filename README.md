@@ -209,3 +209,58 @@ We welcome contributions to PR Pilot! Please check out our [contributing guideli
 ## 📄 License
 
 PR Pilot is open source and available under the GPL-3 License. See the [LICENSE](LICENSE) file for more info.
+
+## 🐳 Docker Compose Setup
+
+To run the project locally using Docker Compose, follow these steps:
+
+1. **Set Environment Variables**: Create a `.env` file in the root directory of the project and add the following environment variables:
+
+    ```env
+    GITHUB_APP_CLIENT_ID=your_github_app_client_id
+    GITHUB_APP_SECRET=your_github_app_secret
+    GITHUB_WEBHOOK_SECRET=your_github_webhook_secret
+    GITHUB_APP_ID=your_github_app_id
+    OPENAI_API_KEY=your_openai_api_key
+    TAVILY_API_KEY=your_tavily_api_key
+    STRIPE_API_KEY=your_stripe_api_key
+    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+    DJANGO_SECRET_KEY=your_django_secret_key
+    SENTRY_DSN=your_sentry_dsn
+    JOB_STRATEGY=your_job_strategy
+    REDIS_HOST=redis
+    REDIS_PORT=6379
+    REPO_CACHE_DIR=/repo_cache
+    SLACK_APP_ID=your_slack_app_id
+    SLACK_CLIENT_ID=your_slack_client_id
+    SLACK_CLIENT_SECRET=your_slack_client_secret
+    SLACK_SIGNING_SECRET=your_slack_signing_secret
+    ```
+
+2. **Run Docker Compose**: Use the following command to start the services:
+
+    ```bash
+    docker-compose up --build
+    ```
+
+3. **Access the Application**: Open your browser and navigate to `http://localhost:8000` to access the application.
+
+4. **Run Migrations**: In a new terminal, run the following command to apply migrations:
+
+    ```bash
+    docker-compose exec app python manage.py migrate
+    ```
+
+5. **Create a Superuser**: Create a superuser to access the Django admin interface:
+
+    ```bash
+    docker-compose exec app python manage.py createsuperuser
+    ```
+
+6. **Static Files**: Collect static files:
+
+    ```bash
+    docker-compose exec app python manage.py collectstatic
+    ```
+
+Your application should now be up and running with Docker Compose.
