@@ -10,9 +10,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_api_key.permissions import BaseHasAPIKey
+from rest_framework import generics
 
-from api.models import UserAPIKey
-from api.serializers import PromptSerializer, TaskSerializer
+from api.models import UserAPIKey, Experiment
+from api.serializers import PromptSerializer, TaskSerializer, ExperimentSerializer
 from engine.models.task import Task, TaskType
 from engine.task_scheduler import SchedulerError
 from webhooks.jwt_tools import get_installation_access_token
@@ -223,7 +224,7 @@ def get_pr_number(request):
     github_repo = request.data.get("github_repo")
     branch = request.data.get("branch")
 
-    if not github_repo or not branch:
+    if not github_repo or branch is None:
         return Response(
             {"error": "github_repo and branch are required"},
             status=status.HTTP_400_BAD_REQUEST,
@@ -248,3 +249,14 @@ def get_pr_number(request):
 
     pr_number = pulls[0].number
     return Response({"pr_number": pr_number}, status=status.HTTP_200_OK)
+
+
+class ExperimentListView(generics.ListAPIView):
+    serializer_class = ExperimentSerializer
+
+    def get_queryset(self):
+        queryset = Experiment.objects.all()
+        name = self.request.query_params.get('name', None)
+        if name is not None:
+            queryset = queryset.filter(name__icontains=name)
+        return queryset

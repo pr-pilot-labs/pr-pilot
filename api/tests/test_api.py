@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 from rest_framework.test import APIClient
 
-from api.models import UserAPIKey
+from api.models import UserAPIKey, Experiment
 from api.views import TASK_LIST_LIMIT
 from engine.models.task import Task
 from webhooks.models import GithubRepository, GitHubAppInstallation, GitHubAccount
@@ -217,3 +217,24 @@ def test_swagger_ui():
 def test_redoc_ui():
     response = client.get("/api/redoc/")
     assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_list_experiments(api_key):
+    Experiment.objects.create(name="Experiment 1", description="Description 1")
+    Experiment.objects.create(name="Experiment 2", description="Description 2")
+
+    response = client.get("/api/experiments/", headers={"X-Api-Key": api_key})
+    assert response.status_code == 200
+    assert len(response.data) == 2
+
+
+@pytest.mark.django_db
+def test_filter_experiments(api_key):
+    Experiment.objects.create(name="Experiment 1", description="Description 1")
+    Experiment.objects.create(name="Test Experiment", description="Description 2")
+
+    response = client.get("/api/experiments/?name=Test", headers={"X-Api-Key": api_key})
+    assert response.status_code == 200
+    assert len(response.data) == 1
+    assert response.data[0]['name'] == "Test Experiment"
