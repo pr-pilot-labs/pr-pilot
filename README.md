@@ -209,3 +209,31 @@ We welcome contributions to PR Pilot! Please check out our [contributing guideli
 ## 📄 License
 
 PR Pilot is open source and available under the GPL-3 License. See the [LICENSE](LICENSE) file for more info.
+
+## 🐳 Docker Compose Setup
+
+To run the project using Docker Compose, follow these steps:
+
+1. Ensure you have Docker and Docker Compose installed on your machine.
+2. Create a `.env` file in the root of the project and set the necessary environment variables as listed above.
+3. Run the following command to start the services:
+
+```bash
+docker-compose up --build
+```
+
+This will build the Docker images and start the following services:
+
+- `app`: The main application server running on port 8000.
+- `worker`: The background worker for handling tasks.
+- `redis`: The Redis server for job scheduling.
+- `db`: The PostgreSQL database server.
+- `nginx`: The Nginx server for serving static files.
+
+4. Access the application at `http://localhost:8000`.
+
+5. To stop the services, run:
+
+```bash
+docker-compose down
+```
