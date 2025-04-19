@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PR Pilot</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.2/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <div class="content has-text-centered">
+                <img src="https://avatars.githubusercontent.com/ml/17635?s=140&v=" width="100" alt="PR Pilot Logo">
+            </div>
+            <div class="tabs is-centered">
+                <ul>
+                    <li><a href="https://github.com/apps/pr-pilot-ai/installations/new"><strong>Install</strong></a></li>
+                    <li><a href="https://docs.pr-pilot.ai">Documentation</a></li>
+                    <li><a href="https://www.pr-pilot.ai/blog">Blog</a></li>
+                    <li><a href="https://www.pr-pilot.ai">Website</a></li>
+                </ul>
+            </div>
+            <h1 class="title has-text-centered">PR Pilot</h1>
+            <div class="has-text-centered">
+                <img src="https://github.com/PR-Pilot-AI/pr-pilot/actions/workflows/unit_tests.yml/badge.svg?branch=main" alt="Build Status">
+                <img src="https://img.shields.io/badge/Python-3.8%2B-blue" alt="Python">
+                <img src="https://img.shields.io/badge/Django-5.0.3-green" alt="Django">
+                <img src="https://img.shields.io/badge/License-GPL--3.0-blue" alt="License">
+                <img src="https://img.shields.io/badge/Version-1.4.10-orange" alt="Version">
+            </div>
+            <p class="has-text-centered">Save time and stay in the flow by delegating routine work to AI with confidence and predictability. PR Pilot assist you in your daily workflow and works with the dev tools you trust and love - exactly when and where you want it.</p>
+            <div class="has-text-centered">
+                <a href="https://asciinema.org/a/664029"><img src="https://asciinema.org/a/664029.svg" alt="asciicast"></a>
+            </div>
+            <p class="has-text-centered">Get started now with our <a href="https://docs.pr-pilot.ai/user_guide.html">User Guide</a>.</p>
+            <h3 class="title is-4">Hand of work to PR Pilot from anywhere</h3>
+            <p>You can interact with PR Pilot in a variety of ways:</p>
+            <h4 class="title is-5">Using the <a href="https://github.com/PR-Pilot-AI/pr-pilot-cli"><strong>Command-Line Interface</strong></a></h4>
+            <pre><code>pilot edit main.py "Add docstrings to all functions and classes"
+</code></pre>
+            <p>With <a href="https://github.com/PR-Pilot-AI/pr-pilot-cli/tree/main/prompts">prompt templates</a>, you can create powerful, reusable commands:</p>
+            <pre><code>I've made some changes and opened a new PR: #{{ env('PR_NUMBER') }}.
+
+I need a PR title and a description that summarizes these changes in short, concise bullet points.
+The PR description will also be used as merge commit message, so it should be clear and informative.
+
+Use the following guidelines:
+
+- Start title with a verb in the imperative mood (e.g., "Add", "Fix", "Update").
+- At the very top, provide 1-sentence summary of the changes and their impact.
+- Below, list the changes made in bullet points.
+
+# Your task
+Edit PR #{{ env('PR_NUMBER') }} title and description to reflect the changes made in this PR.
+</code></pre>
+            <p>Send PR Pilot off to give any PR a title and description according to your guidelines:</p>
+            <pre><code>PR_NUMBER=153 pilot task -f generate-pr-description.md.jinja2
+</code></pre>
+            <h4 class="title is-5">Using the <a href="https://github.com/PR-Pilot-AI/pr-pilot-python"><strong>Python SDK</strong></a>:</h4>
+            <pre><code>from pr_pilot.util import create_task, wait_for_result
+
+prompt = """
+1. Find all 'bug' issues created yesterday on Slack and Linear.
+2. Summarize and post them to #bugs-daily on Slack
+3. Save the summary in `reports/<date>.md`
+"""
+
+github_repo = "PR-Pilot-AI/pr-pilot"
+task = create_task(github_repo, prompt)
+result = wait_for_result(task)
+
+print(result)
+</code></pre>
+            <h4 class="title is-5">Using the <a href="https://app.pr-pilot.ai/api/redoc/"><strong>REST API</strong></a>:</h4>
+            <pre><code>curl -X POST 'https://app.pr-pilot.ai/api/tasks/' \
+-H 'Content-Type: application/json' \
+-H 'X-Api-Key: YOUR_API_KEY_HERE' \
+-d '{
+    "prompt": "Properly format the README.md and add emojis",
+    "github_repo": "owner/repo"
+}'
+</code></pre>
+            <h4 class="title is-5">Using <a href="https://github.com/PR-Pilot-AI/smart-workflows"><strong>Smart Workflows</strong></a>:</h4>
+            <pre><code># .github/workflows/chat_bot.yaml
+
+name: "🤖 My Project's Custom Chat Bot"
+
+on:
+  issues:
+    types: [labeled, commented]
+  issue_comment:
+    types: [created]
+
+jobs:
+  handle-chat:
+    if: &gt;
+      (github.event.label.name == 'chat' || contains(github.event.issue.labels.*.name, 'chat')) &amp;&amp;
+      github.event.sender.login != 'pr-pilot-ai[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: AI Chat Response
+        uses: PR-Pilot-AI/smart-actions/quick-task@v1
+        with:
+          api-key: ${{ secrets.PR_PILOT_API_KEY }}
+          agent-instructions: |
+              @${{ github.event.sender.login }} commented on issue #${{ github.event.issue.number }}.
+              Read the content of issue #${{ github.event.issue.number }}.
+              If there are no comments yet, add a comment that makes sense in the context of the issue.
+              If there are comments, provide a response to the latest comment.
+</code></pre>
+            <h4 class="title is-5">or talk to PR Pilot directly on <a href="https://github.com/PR-Pilot-AI/pr-pilot/issues?q=label:demo+"><strong>Github issues and PRs</strong></a>:</h4>
+            <div class="has-text-centered">
+                <img src="docs/source/img/first_command.png" alt="First pilot command">
+            </div>
+            <h2 class="title is-4">🛠️ Installation</h2>
+            <p>To get started, follow our <a href="https://docs.pr-pilot.ai/user_guide.html">User Guide</a>.</p>
+            <h2 class="title is-4">🚀 Run Locally</h2>
+            <p>Set the following environment variables:</p>
+            <table class="table is-striped is-fullwidth">
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>GITHUB_APP_CLIENT_ID</code></td>
+                        <td>GitHub App Client ID</td>
+                    </tr>
+                    <tr>
+                        <td><code>GITHUB_APP_SECRET</code></td>
+                        <td>GitHub App Secret</td>
+                    </tr>
+                    <tr>
+                        <td><code>GITHUB_WEBHOOK_SECRET</code></td>
+                        <td>Secret for securing webhooks</td>
+                    </tr>
+                    <tr>
+                        <td><code>GITHUB_APP_ID</code></td>
+                        <td>GitHub App ID</td>
+                    </tr>
+                    <tr>
+                        <td><code>OPENAI_API_KEY</code></td>
+                        <td>API key for OpenAI services</td>
+                    </tr>
+                    <tr>
+                        <td><code>REPO_DIR</code></td>
+                        <td>Directory for storing repository data</td>
+                    </tr>
+                    <tr>
+                        <td><code>TAVILY_API_KEY</code></td>
+                        <td>API key for Tavily search engine</td>
+                    </tr>
+                    <tr>
+                        <td><code>STRIPE_API_KEY</code></td>
+                        <td>Stripe API key for handling payments</td>
+                    </tr>
+                    <tr>
+                        <td><code>STRIPE_WEBHOOK_SECRET</code></td>
+                        <td>Secret for securing Stripe webhook endpoints</td>
+                    </tr>
+                    <tr>
+                        <td><code>DJANGO_SECRET_KEY</code></td>
+                        <td>Secret key for Django</td>
+                    </tr>
+                    <tr>
+                        <td><code>SENTRY_DSN</code></td>
+                        <td>(Optional) Sentry DSN for error monitoring</td>
+                    </tr>
+                    <tr>
+                        <td><code>JOB_STRATEGY</code></td>
+                        <td>(Optional) Strategy for running jobs ('thread', 'redis', 'log')</td>
+                    </tr>
+                    <tr>
+                        <td><code>REDIS_HOST</code></td>
+                        <td>(Optional) Redis host for job scheduling</td>
+                    </tr>
+                    <tr>
+                        <td><code>REDIS_PORT</code></td>
+                        <td>(Optional) Redis port for job scheduling</td>
+                    </tr>
+                    <tr>
+                        <td><code>REPO_CACHE_DIR</code></td>
+                        <td>(Optional) Directory for storing repository cache</td>
+                    </tr>
+                    <tr>
+                        <td><code>REPO_DIR</code></td>
+                        <td>(Optional) Workspace for storing repo in worker</td>
+                    </tr>
+                    <tr>
+                        <td><code>SLACK_APP_ID</code></td>
+                        <td>Slack App ID</td>
+                    </tr>
+                    <tr>
+                        <td><code>SLACK_CLIENT_ID</code></td>
+                        <td>Slack Client ID</td>
+                    </tr>
+                    <tr>
+                        <td><code>SLACK_CLIENT_SECRET</code></td>
+                        <td>Slack Client Secret</td>
+                    </tr>
+                    <tr>
+                        <td><code>SLACK_SIGNING_SECRET</code></td>
+                        <td>Slack Signing Secret</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>To get PR Pilot up and running on your own machine, follow these steps:</p>
+            <pre><code># Clone the repository
+git clone https://github.com/PR-Pilot-AI/pr-pilot.git
+
+# Change directory
+cd pr-pilot
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Apply migrations
+python manage.py migrate
+
+# Create a superuser
+python manage.py createsuperuser
+
+# Start the development server
+python manage.py runserver
+</code></pre>
+            <p>To expose your local server to the internet, you can use <code>ngrok</code>:</p>
+            <pre><code>ngrok http 8000
+</code></pre>
+            <h2 class="title is-4">🧪 Unit Tests</h2>
+            <p>PR Pilot uses <code>tox</code> for managing unit tests. The test setup is configured in the <code>tox.ini</code> file, and tests are written using <code>pytest</code>.</p>
+            <p>To run the tests, execute:</p>
+            <pre><code>tox
+</code></pre>
+            <p>This will run all the tests defined in the project, ensuring that your changes do not break existing functionality.</p>
+            <h2 class="title is-4">📚 Code Documentation</h2>
+            <p>For more information on the code structure and documentation, please visit <a href="docs/code">docs/code</a>.</p>
+            <h2 class="title is-4">🤝 Contributing</h2>
+            <p>We welcome contributions to PR Pilot! Please check out our <a href="CONTRIBUTING.md">contributing guidelines</a> for more information on how to get involved.</p>
+            <h2 class="title is-4">📄 License</h2>
+            <p>PR Pilot is open source and available under the GPL-3 License. See the <a href="LICENSE">LICENSE</a> file for more info.</p>
+        </div>
+    </section>
+</body>
+</html>
