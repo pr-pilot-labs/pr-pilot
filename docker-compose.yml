@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      GITHUB_APP_CLIENT_ID: ${GITHUB_APP_CLIENT_ID}
+      GITHUB_APP_SECRET: ${GITHUB_APP_SECRET}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPO_DIR: ${REPO_DIR}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      JOB_STRATEGY: ${JOB_STRATEGY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REPO_CACHE_DIR: ${REPO_CACHE_DIR}
+      REPO_DIR: ${REPO_DIR}
+      SLACK_APP_ID: ${SLACK_APP_ID}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - db
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+
+  db:
+    image: "postgres:13"
+    environment:
+      POSTGRES_DB: prpilot
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      GITHUB_APP_CLIENT_ID: ${GITHUB_APP_CLIENT_ID}
+      GITHUB_APP_SECRET: ${GITHUB_APP_SECRET}
+      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
+      GITHUB_APP_ID: ${GITHUB_APP_ID}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REPO_DIR: ${REPO_DIR}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
+      STRIPE_API_KEY: ${STRIPE_API_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      SENTRY_DSN: ${SENTRY_DSN}
+      JOB_STRATEGY: ${JOB_STRATEGY}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REPO_CACHE_DIR: ${REPO_CACHE_DIR}
+      REPO_DIR: ${REPO_DIR}
+      SLACK_APP_ID: ${SLACK_APP_ID}
+      SLACK_CLIENT_ID: ${SLACK_CLIENT_ID}
+      SLACK_CLIENT_SECRET: ${SLACK_CLIENT_SECRET}
+      SLACK_SIGNING_SECRET: ${SLACK_SIGNING_SECRET}
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - repo-cache:/repo_cache
+
+volumes:
+  repo-cache:
+    driver: local
